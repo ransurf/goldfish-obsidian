@@ -11,6 +11,7 @@ import {
 
 import { openInputModal, throwError } from "./utils";
 import { toISOStringWithTimezone } from "utils/date";
+import { convertHtmlToMarkdown } from "./utils/parser";
 
 export interface ObsidianNote {
   file: TFile;
@@ -225,6 +226,15 @@ export default class FleetingNotesPlugin extends Plugin {
     try {
       // pull fleeting notes
       let notes = await this.supabaseSync.getAllNotes();
+      notes.forEach((note: Note) => {
+        if (note.content) {
+          console.log('note content prior conversion', note.content)
+          note.content = convertHtmlToMarkdown(note.content);
+        }
+        if (note.original_transcript) {
+          note.original_transcript = convertHtmlToMarkdown(note.original_transcript);
+        }
+      });
       notes = notes.filter((note: Note) => !note.deleted_at);
       const deleteAfterSync = this.settings.sync_type == "one-way-delete";
       await this.fileSystemSync.upsertNotes(notes, deleteAfterSync);
