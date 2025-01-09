@@ -40,17 +40,18 @@ uuid: "\${id}"
 # Optional fields
 title: "\${title}"
 tags: \${tags}
-source: "\${source}"
-source_title: "\${source_title}"
-source_description: "\${source_description}"
-source_image_url: "\${source_image_url}"
 created_date: "\${created_date}"
 modified_date: "\${last_modified_date}"
 ---
-\${content}`,
+## Cleaned
+\${cleaned}
+
+## Original
+\${original}`
+  ,
   sync_on_startup: false,
   last_sync_time: new Date(0),
-  sync_type: "one-way",
+  sync_type: "one-way-delete",
   sync_obsidian_links: false,
   sync_obsidian_links_title: "Links from Obsidian",
   notes_filter: "",
@@ -232,28 +233,24 @@ export class FleetingNotesSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Sync type")
-      .setDesc(
-        "Warning: Deleting a note in Obsidian results in its removal from FN with two-way sync",
-      )
       .addDropdown((dropdown) =>
         dropdown
-          .addOption("one-way", "One-way sync (FN ⇒ Obsidian)")
+          .addOption("one-way", "One-way sync (Goldfish ⇒ Obsidian)")
           .addOption(
             "one-way-delete",
-            "One-way sync (FN ⇒ Obsidian) + Delete from FN",
+            "One-way sync (Goldfish ⇒ Obsidian) + Delete",
           )
-          .addOption(
-            "realtime-one-way",
-            "Realtime One-way sync (FN ⇒ Obsidian)",
-          )
-          .addOption(
-            "realtime-two-way",
-            "Realtime Two-way sync (FN ⇔ Obsidian)",
-          )
+          // .addOption(
+          //   "realtime-one-way",
+          //   "Realtime One-way sync (FN ⇒ Obsidian)",
+          // )
+          // .addOption(
+          //   "realtime-two-way",
+          //   "Realtime Two-way sync (FN ⇔ Obsidian)",
+          // )
           .setValue(this.plugin.settings.sync_type)
           .onChange(async (value) => {
             this.plugin.settings.sync_type = value;
-            this.plugin.initRealtime(value);
             if (value.contains("two-way")) {
               noteTemplateComponent.inputEl.setAttr("disabled", true);
               this.plugin.settings.note_template =
@@ -370,26 +367,5 @@ export class FleetingNotesSettingsTab extends PluginSettingTab {
           })
       );
 
-    new Setting(containerEl)
-      .setName("Sync Obsidian [[links]] to Fleeting Notes")
-      .setDesc(
-        `The note titled "${this.plugin.settings.sync_obsidian_links_title}" will be overwritten in the Fleeting Notes app. If you have a lot of links avoid opening the "Links from Obsidian" in Fleeting Notes as it may crash the app.`,
-      )
-      .addToggle((tog) => {
-        tog
-          .setValue(this.plugin.settings.sync_obsidian_links)
-          .onChange(async (val) => {
-            if (val) {
-              const ok = await this.plugin.syncObsidianLinks();
-              if (ok) {
-                this.plugin.settings.sync_obsidian_links = val;
-                await this.plugin.saveSettings();
-              }
-            } else {
-              this.plugin.settings.sync_obsidian_links = val;
-              await this.plugin.saveSettings();
-            }
-          });
-      });
   }
 }

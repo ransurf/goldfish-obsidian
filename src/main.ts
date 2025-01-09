@@ -10,6 +10,7 @@ import {
 } from "./settings";
 
 import { openInputModal, throwError } from "./utils";
+import { toISOStringWithTimezone } from "utils/date";
 
 export interface ObsidianNote {
   file: TFile;
@@ -21,14 +22,10 @@ export interface Note {
   uuid: string;
   title?: string;
   content?: string;
+  original_transcript?: string;
   created_at?: string;
   modified_at?: string;
-  source?: string;
-  source_title?: string;
-  source_description?: string;
-  source_image_url?: string;
-  deleted?: boolean;
-  encrypted?: boolean;
+  deleted_at: string;
 }
 
 export default class FleetingNotesPlugin extends Plugin {
@@ -42,7 +39,7 @@ export default class FleetingNotesPlugin extends Plugin {
     await this.loadSettings();
     // This forces fleeting notes to sync with obsidian
     this.addCommand({
-      uuid: "sync-fleeting-notes",
+      id: "sync-fleeting-notes",
       name: "Sync Notes with Fleeting Notes",
       callback: async () => {
         const isSuccess = await this.syncFleetingNotes();
@@ -53,7 +50,7 @@ export default class FleetingNotesPlugin extends Plugin {
     });
 
     this.addCommand({
-      uuid: "create-empty-fleeting-note",
+      id: "create-empty-fleeting-note",
       name: "Create Empty Fleeting Note",
       callback: async () => {
         try {
@@ -66,7 +63,7 @@ export default class FleetingNotesPlugin extends Plugin {
     });
 
     this.addCommand({
-      uuid: "insert-notes-containing",
+      id: "insert-notes-containing",
       name: "Insert All Notes Containing Specific Text",
       callback: async () => {
         openInputModal(
@@ -106,9 +103,6 @@ export default class FleetingNotesPlugin extends Plugin {
     /// init supabase sync
     this.supabaseSync = new SupabaseSync(this.settings);
 
-    // intialize realtime
-    this.initRealtime(this.settings.sync_type);
-
     // syncs on startup
     // Files might not be loaded yet
     this.app.workspace.onLayoutReady(async () => {
@@ -122,27 +116,6 @@ export default class FleetingNotesPlugin extends Plugin {
   disableAutoSync() {
     if (this.settings.sync_interval) {
       clearInterval(this.settings.sync_interval);
-    }
-  }
-
-  initRealtime(sync_type: string) {
-    if (sync_type === "realtime-two-way") {
-      this.fileSystemSync.onNoteChange(this.supabaseSync.updateNote);
-      this.supabaseSync.onNoteChange((note) =>
-        (note.deleted)
-          ? this.fileSystemSync.deleteNotes([note])
-          : this.fileSystemSync.upsertNotes([note])
-      );
-    } else if (sync_type === "realtime-one-way") {
-      this.fileSystemSync.offNoteChange();
-      this.supabaseSync.onNoteChange((note) =>
-        (note.deleted)
-          ? this.fileSystemSync.deleteNotes([note])
-          : this.fileSystemSync.upsertNotes([note])
-      );
-    } else {
-      this.fileSystemSync.offNoteChange();
-      this.supabaseSync.removeAllChannels();
     }
   }
 
@@ -201,7 +174,6 @@ export default class FleetingNotesPlugin extends Plugin {
   onunload() {
     this.disableAutoSync();
     this.supabaseAuthSubscription?.unsubscribe();
-    this.fileSystemSync.offNoteChange();
     this.supabaseSync.removeAllChannels();
     clearInterval(this.tokenRefreshTimer);
   }
@@ -256,17 +228,13 @@ export default class FleetingNotesPlugin extends Plugin {
       }
       // pull fleeting notes
       let notes = await this.supabaseSync.getAllNotes();
-      notes = notes.filter((note: Note) => !note.deleted);
+      notes = notes.filter((note: Note) => !note.deleted_at);
       const deleteAfterSync = this.settings.sync_type == "one-way-delete";
       await this.fileSystemSync.upsertNotes(notes, deleteAfterSync);
       if (deleteAfterSync) {
         await this.deleteFleetingNotes(notes);
       }
       this.settings.last_sync_time = new Date();
-      // syncs links with Fleeting Notes
-      if (this.settings.sync_obsidian_links) {
-        this.syncObsidianLinks();
-      }
 
       return true;
     } catch (e) {
@@ -305,32 +273,13 @@ export default class FleetingNotesPlugin extends Plugin {
     }
   }
 
-  async syncObsidianLinks() {
-    try {
-      let note = await this.supabaseSync.getNoteByTitle(
-        this.settings.sync_obsidian_links_title,
-      );
-      if (!note) {
-        note = await this.supabaseSync.createEmptyNote();
-      }
-      const allLinks = this.getAllLinks();
-      const allLinksStr = allLinks.map((link) => `[[${link}]]`).join(" ");
-      note.title = this.settings.sync_obsidian_links_title;
-      note.content = allLinksStr;
-      await this.supabaseSync.updateNote(note);
-      return true;
-    } catch (e) {
-      throwError(e, "Failed to push Obsidian [[links]] to Fleeting Notes");
-    }
-  }
-
   async deleteFleetingNotes(notes: Note[]) {
     try {
       var notesToDelete = await Promise.all(
         notes.map(async (note) => {
           return {
             uuid: note.uuid,
-            deleted: true,
+            deleted_at: toISOStringWithTimezone(),
           };
         }),
       );

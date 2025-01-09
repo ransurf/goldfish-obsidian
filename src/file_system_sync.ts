@@ -98,8 +98,8 @@ class FileSystemSync {
               content,
             });
           }
-          // download source
-          this.downloadSource(note, this.settings.attachments_folder);
+          // // download source
+          // this.downloadSource(note, this.settings.attachments_folder);
         } catch (e) {
           throwError(
             e,
@@ -112,32 +112,32 @@ class FileSystemSync {
     }
   };
 
-  downloadSource = async (note: Note, folder: string): Promise<void> => {
-    try {
-      const re = /^https:\/\/\w+\.supabase\.co\/storage\/.+$/;
-      if (!(re.test(note.source) && this.settings.attachments_folder)) return;
-      const ext = note.source.split(".").pop();
-      let filename = `${note.uuid}.${ext}`;
-      const title = escapeTitle(note.title)
-      if (title) {
-        filename = (title.endsWith(`.${ext}`))
-          ? title
-          : `${title}.${ext}`;
-      }
-      const path = pathJoin([folder, filename]);
-      if (await this.vault.adapter.exists(path)) {
-        console.log(`File "${path}" already exists`);
-        return;
-      }
-      const res = await requestUrl({
-        method: "GET",
-        url: note.source,
-      });
-      this.vault.createBinary(path, res.arrayBuffer);
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  // downloadSource = async (note: Note, folder: string): Promise<void> => {
+  //   try {
+  //     const re = /^https:\/\/\w+\.supabase\.co\/storage\/.+$/;
+  //     if (!(re.test(note.source) && this.settings.attachments_folder)) return;
+  //     const ext = note.source.split(".").pop();
+  //     let filename = `${note.uuid}.${ext}`;
+  //     const title = escapeTitle(note.title)
+  //     if (title) {
+  //       filename = (title.endsWith(`.${ext}`))
+  //         ? title
+  //         : `${title}.${ext}`;
+  //     }
+  //     const path = pathJoin([folder, filename]);
+  //     if (await this.vault.adapter.exists(path)) {
+  //       console.log(`File "${path}" already exists`);
+  //       return;
+  //     }
+  //     const res = await requestUrl({
+  //       method: "GET",
+  //       url: note.source,
+  //     });
+  //     this.vault.createBinary(path, res.arrayBuffer);
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  // };
 
   getAllNotes = async () => {
     const noteList: Array<ObsidianNote> = [];
@@ -163,7 +163,7 @@ class FileSystemSync {
   deleteNotes = async (notes: Note[]) => {
     try {
       await Promise.all(
-        notes.map(async (note) => {
+        notes.map(async (note): Promise<null> => {
           const obsNote = this.existingNoteMap.get(note.uuid);
           if (obsNote) {
             await this.vault.delete(obsNote.file);
@@ -177,35 +177,6 @@ class FileSystemSync {
     }
   };
 
-  onNoteChange = (
-    handleNoteChange: (notes: Note) => void,
-    includeDelete = true,
-  ) => {
-    this.offNoteChange();
-    if (includeDelete) {
-      this.deleteRef = this.vault.on("delete", (file) => {
-        if (!this.fileInDir(file)) return;
-        for (const k of this.existingNoteMap.keys()) {
-          const path = this.existingNoteMap.get(k)?.file.path;
-          const noteId = this.existingNoteMap.get(k)?.frontmatter?.id;
-          if (noteId && path === file.path) {
-            return handleNoteChange({ uuid: noteId, deleted: true });
-          }
-        }
-      });
-    }
-    this.modifyRef = this.vault.on("modify", (file) => {
-      if (!this.fileInDir(file)) return;
-      this.convertFileToNote(file as TFile).then((n) => {
-        handleNoteChange(FileSystemSync.parseObsidianNote(n));
-      });
-    });
-  };
-
-  offNoteChange = () => {
-    this.vault.offref(this.deleteRef);
-    this.vault.offref(this.modifyRef);
-  };
 
   static parseObsidianNote = (note: ObsidianNote): Note => {
     var { file, frontmatter, content } = note;
@@ -213,8 +184,7 @@ class FileSystemSync {
       uuid: frontmatter.id,
       title: frontmatter.title || undefined,
       content: content || undefined,
-      source: frontmatter.source || undefined,
-      deleted: frontmatter.deleted || undefined,
+      deleted_at: frontmatter.deleted_at || undefined,
       modified_at: new Date(file.stat.mtime).toISOString(),
     };
   };

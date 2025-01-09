@@ -2,7 +2,8 @@ import { AuthResponse, createClient } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
 import { Note } from "main";
 import { FleetingNotesSettings } from "settings";
-import { decryptNote, encryptNote, throwError } from "utils";
+import { throwError } from "utils";
+import { toISOStringWithTimezone } from "utils/date";
 
 const supabase = createClient(
   "https://rxgdjkasqfkaeicnijys.supabase.co",
@@ -13,12 +14,11 @@ export interface SupabaseNote {
   uuid: string | null;
   title: string | null;
   content: string | null;
+  original_transcript: string | null;
   created_at: string;
   modified_at: string | null;
   deleted_at: string | null;
-  shared: boolean;
-  encrypted: boolean;
-  _partition: string;
+  user_id: string;
 }
 
 class SupabaseSync {
@@ -29,14 +29,11 @@ class SupabaseSync {
 
   isUpdateNoteSimilar(supaNote: SupabaseNote, updateNote: Note): boolean {
     let tempSupaNote = { ...supaNote } as SupabaseNote;
-    if (tempSupaNote.encrypted) {
-      tempSupaNote = decryptNote(tempSupaNote, this.settings.encryption_key);
-    }
     // If updateNote property is empty, then we dont count it as being similar
     return (typeof updateNote.title !== "string" ||
       updateNote.title === tempSupaNote.title) &&
       (typeof updateNote.content !== "string" ||
-        updateNote.content === tempSupaNote.content) &&
+        updateNote.content === tempSupaNote.content);
   }
 
   updateNote = async (note: Note) => {
@@ -51,8 +48,8 @@ class SupabaseSync {
       const query = supabase
         .from("notes")
         .select()
-        .in("_partition", [this.settings.firebaseId, this.settings.supabaseId])
-        .eq("deleted", false);
+        .in("user_id", [this.settings.firebaseId, this.settings.supabaseId])
+        .eq("deleted_at", toISOStringWithTimezone());
 
       // header size will be too big otherwise
       if (noteIds.size < 100) {
@@ -86,13 +83,11 @@ class SupabaseSync {
           ...supabaseNote,
           title: note.title || supabaseNote.title,
           content: note.content || supabaseNote.content,
-          source: note.source || supabaseNote.source,
+          original_transcript: note.original_transcript || supabaseNote.original_transcript,
           modified_at: new Date().toISOString(),
-          deleted: note.deleted || supabaseNote.deleted,
+          deleted_at: note.deleted_at || supabaseNote.deleted_at,
         };
-        return (supabaseNote.encrypted)
-          ? encryptNote(newNote, this.settings.encryption_key)
-          : newNote;
+        return newNote;
       });
 
       if (notes.length > 0) {
@@ -118,13 +113,11 @@ class SupabaseSync {
       uuid: uuidv4(),
       title: "",
       content: "",
-      source: "",
+      original_transcript: "",
       created_at: new Date().toISOString(),
       modified_at: new Date().toISOString(),
-      deleted: false,
-      shared: false,
-      encrypted: false,
-      _partition: this.settings.supabaseId,
+      deleted_at: null,
+      user_id: this.settings.supabaseId,
     } as SupabaseNote;
     const { error } = await supabase.from("notes").insert(emptyNote);
     if (error) {
@@ -138,9 +131,7 @@ class SupabaseSync {
       .eq("title", title)
       .eq("deleted", false);
     let note = null;
-    if (res.data && res.data.length > 0) {
-      note = decryptNote(res.data[0], this.settings.encryption_key);
-    }
+
     return note as Note | null;
   };
 
@@ -157,11 +148,11 @@ class SupabaseSync {
         .from("notes")
         .select()
         .filter(
-          "_partition",
+          "user_id",
           "in",
           `(${this.settings.firebaseId},${this.settings.supabaseId})`,
         )
-        .filter("deleted", "eq", false);
+        .filter("deleted_at", "is", null);
       if (this.settings.sync_obsidian_links) {
         query.neq("title", this.settings.sync_obsidian_links_title);
       }
@@ -170,9 +161,7 @@ class SupabaseSync {
           throwError(res.error, res.error.message);
         }
         notes = Array.from(
-          res.data?.map((note: any) =>
-            decryptNote(note, this.settings.encryption_key)
-          ) || [],
+          res.data || [],
         );
         if (this.settings.notes_filter) {
           notes = notes.filter(
@@ -271,12 +260,9 @@ class SupabaseSync {
         }
         if (
           [this.settings.supabaseId, this.settings.firebaseId].includes(
-            note._partition,
+            note.user_id,
           )
         ) {
-          if (note.encrypted) {
-            note = decryptNote(note, this.settings.encryption_key);
-          }
           handleNoteChange(note);
         }
       })

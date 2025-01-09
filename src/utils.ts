@@ -4,6 +4,7 @@ import { moment } from "obsidian";
 import { InputModal, ModalInputField, Values } from "./components/inputModal";
 import { SupabaseNote } from "./supabase_sync";
 import { FleetingNotesSettings } from "./settings";
+import { toISOStringWithTimezone } from "utils/date";
 
 export function openInputModal(
   title: string,
@@ -32,71 +33,6 @@ export function throwError(e: any, errMessage: string) {
   }
 }
 
-export const decryptNote = (note: SupabaseNote, key: string) => {
-  if (note.encrypted) {
-    if (key === "") {
-      throwError(
-        Error("No encryption key found"),
-        "No encryption key found",
-      );
-    }
-    if (note.title) {
-      note.title = decryptText(note.title, key);
-    }
-    if (note.content) {
-      note.content = decryptText(note.content, key);
-    }
-    if (note.source) {
-      note.source = decryptText(note.source, key);
-    }
-    if (note.source_title) {
-      note.source_title = decryptText(note.source_title, key);
-    }
-    if (note.source_description) {
-      note.source_description = decryptText(note.source_description, key);
-    }
-    if (note.source_image_url) {
-      note.source_image_url = decryptText(note.source_image_url, key);
-    }
-    note.encrypted = false;
-  }
-  return note;
-};
-
-export const encryptNote = (note: Note, key: string) => {
-  if (key !== "") {
-    if (note.title) {
-      note.title = encryptText(note.title, key);
-    }
-    if (note.content) {
-      note.content = encryptText(note.content, key);
-    }
-    if (note.source) {
-      note.source = encryptText(note.source, key);
-    }
-    // Don't encrypt source metadata unless you want to sync it as well!
-    note.encrypted = true;
-  }
-  return note;
-};
-
-export const decryptText = (text: string, key: string): string => {
-  const bytes = CryptoJS.AES.decrypt(text, key);
-  const originalText = bytes.toString(CryptoJS.enc.Utf8);
-  if (!originalText) {
-    throwError(
-      Error("Wrong encryption key"),
-      "Wrong encryption key",
-    );
-  }
-  return originalText;
-};
-
-export const encryptText = (text: string, key: string): string => {
-  const ciphertext = CryptoJS.AES.encrypt(text, key).toString();
-  return ciphertext;
-};
-
 export const extractAllTags = (text: string): string[] => {
   let tags = [];
   let tagRegex = /(^|\B)#(?![0-9_]+\b)([a-zA-Z0-9_\/]{1,50})(\b|\r)/gm;
@@ -119,8 +55,7 @@ export const getDefaultNoteTitle = (
   settings: FleetingNotesSettings,
 ) => {
   const noteCopy = { ...note } as Note;
-  const titleFromContent = escapeTitle(noteCopy.content) ||
-    escapeTitle(noteCopy.source_title);
+  const titleFromContent = escapeTitle(noteCopy.content)
   if (!noteCopy.title) {
     if (!settings.auto_generate_title || titleFromContent.length === 0) {
       noteCopy.title = noteCopy.uuid;
@@ -161,28 +96,20 @@ export function getFilledTemplate(
   if (metadataMatch) {
     const escapedTitle = escapeForYaml(note.title);
     const escapedContent = escapeForYaml(content);
-    const escapedSource = escapeForYaml(note.source);
-    const escapedSourceTitle = escapeForYaml(note.source_title);
-    const escapedSourceDescription = escapeForYaml(note.source_description);
-    const escapedSourceImageUrl = escapeForYaml(note.source_image_url);
+    const escapedOriginalTranscript = escapeForYaml(note.original_transcript);
     const escapedTags = `[${tags.join(", ")}]`;
     var newMetadata = metadataMatch[1]
       .replace(/\$\{title\}/gm, escapedTitle)
       .replace(/\$\{tags\}/gm, escapedTags)
-      .replace(/\$\{content\}/gm, escapedContent)
-      .replace(/\$\{source\}/gm, escapedSource)
-      .replace(/\$\{source_title\}/gm, escapedSourceTitle)
-      .replace(/\$\{source_description\}/gm, escapedSourceDescription)
-      .replace(/\$\{source_image_url\}/gm, escapedSourceImageUrl);
+      .replace(/\$\{cleaned\}/gm, escapedContent)
+      .replace(/\$\{original\}/gm, escapedOriginalTranscript)
     if (addDeleted) {
-      const deleted_match = newMetadata.match(/^deleted:.*$/);
+      const deleted_match = newMetadata.match(/^deleted_at:.*$/);
       if (deleted_match) {
         newMetadata = newMetadata.replace(
           deleted_match[0],
-          "deleted: true",
+          `deleted_at: ${toISOStringWithTimezone()}`,
         );
-      } else {
-        newMetadata += "\ndeleted: true";
       }
     }
     newMetadata = `---\n${newMetadata}\n---\n`;
@@ -201,11 +128,8 @@ export function getFilledTemplate(
       /\$\{last_modified_date\}/gm,
       moment(note.modified_at).local().format(dateFormat),
     )
-    .replace(/\$\{content\}/gm, content)
-    .replace(/\$\{source\}/gm, note.source)
-    .replace(/\$\{source_title\}/gm, note.source_title || "")
-    .replace(/\$\{source_description\}/gm, note.source_description || "")
-    .replace(/\$\{source_image_url\}/gm, note.source_image_url || "");
+    .replace(/\$\{cleaned\}/gm, content)
+    .replace(/\$\{original\}/gm, note.original_transcript)
 
   return newTemplate;
 }
