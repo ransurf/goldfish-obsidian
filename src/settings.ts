@@ -32,11 +32,9 @@ export interface FleetingNotesSettings {
 
 export const DEFAULT_SETTINGS: FleetingNotesSettings = {
   auto_generate_title: true,
-  fleeting_notes_folder: "FleetingNotesApp",
-  attachments_folder: "",
+  fleeting_notes_folder: "GoldfishNotes",
+  attachments_folder: "Attachments",
   note_template: `---
-# Mandatory fields
-uuid: "\${id}"
 # Optional fields
 title: "\${title}"
 tags: \${tags}
