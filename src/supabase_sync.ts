@@ -48,7 +48,7 @@ class SupabaseSync {
       const query = supabase
         .from("notes")
         .select()
-        .in("user_id", [this.settings.firebaseId, this.settings.supabaseId])
+        .eq("user_id", this.settings.supabaseId)
         .eq("deleted_at", toISOStringWithTimezone());
 
       // header size will be too big otherwise
@@ -146,20 +146,18 @@ class SupabaseSync {
       }
       let query = supabase
         .from("notes")
-        .select()
-        .filter(
+        .select('*', { count: 'exact' })
+        .eq(
           "user_id",
-          "in",
-          `(${this.settings.firebaseId},${this.settings.supabaseId})`,
+          this.settings.supabaseId,
         )
         .filter("deleted_at", "is", null);
-      if (this.settings.sync_obsidian_links) {
-        query.neq("title", this.settings.sync_obsidian_links_title);
-      }
       await query.then((res) => {
         if (res.error) {
+          console.log('res.error', res.error)
           throwError(res.error, res.error.message);
         }
+        console.log('res.data', res.data)
         notes = Array.from(
           res.data || [],
         );
