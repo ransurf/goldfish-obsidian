@@ -223,9 +223,6 @@ export default class FleetingNotesPlugin extends Plugin {
       return false;
     }
     try {
-      if (this.settings.sync_type === "two-way") {
-        await this.pushFleetingNotes();
-      }
       // pull fleeting notes
       let notes = await this.supabaseSync.getAllNotes();
       notes = notes.filter((note: Note) => !note.deleted_at);
