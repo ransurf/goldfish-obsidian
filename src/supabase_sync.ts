@@ -5,8 +5,8 @@ import { FleetingNotesSettings } from "settings";
 import { decryptNote, encryptNote, throwError } from "utils";
 
 const supabase = createClient(
-  "https://yixcweyqwkqyvebpmdvr.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpeGN3ZXlxd2txeXZlYnBtZHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NjQ4MDMyMTgsImV4cCI6MTk4MDM3OTIxOH0.awfZKRuaLOPzniEJ2CIth8NWPYnelLfsWrMWH2Bz3w8",
+  "https://rxgdjkasqfkaeicnijys.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4Z2Rqa2FzcWZrYWVpY25panlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg3NzE4MjksImV4cCI6MjA0NDM0NzgyOX0.YZxOZDem6nb12g22rz2O7E2vf6H4stwziDiwkdo0AM4",
 );
 
 export interface SupabaseNote {
