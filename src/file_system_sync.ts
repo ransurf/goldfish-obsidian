@@ -65,7 +65,7 @@ class FileSystemSync {
         var note = notes[i];
         const path = this.getNotePath(note);
         try {
-          var noteFile = this.existingNoteMap.get(note.id) || null;
+          var noteFile = this.existingNoteMap.get(note.uuid) || null;
           var mdContent = getFilledTemplate(
             this.settings.note_template,
             note,
@@ -92,7 +92,7 @@ class FileSystemSync {
             var { frontmatter, content } = await this.parseNoteFile(
               createdFile,
             );
-            this.existingNoteMap.set(note.id, {
+            this.existingNoteMap.set(note.uuid, {
               file: createdFile,
               frontmatter,
               content,
@@ -117,7 +117,7 @@ class FileSystemSync {
       const re = /^https:\/\/\w+\.supabase\.co\/storage\/.+$/;
       if (!(re.test(note.source) && this.settings.attachments_folder)) return;
       const ext = note.source.split(".").pop();
-      let filename = `${note.id}.${ext}`;
+      let filename = `${note.uuid}.${ext}`;
       const title = escapeTitle(note.title)
       if (title) {
         filename = (title.endsWith(`.${ext}`))
@@ -164,10 +164,10 @@ class FileSystemSync {
     try {
       await Promise.all(
         notes.map(async (note) => {
-          const obsNote = this.existingNoteMap.get(note.id);
+          const obsNote = this.existingNoteMap.get(note.uuid);
           if (obsNote) {
             await this.vault.delete(obsNote.file);
-            this.existingNoteMap.delete(note.id);
+            this.existingNoteMap.delete(note.uuid);
           }
           return null;
         }),
@@ -189,7 +189,7 @@ class FileSystemSync {
           const path = this.existingNoteMap.get(k)?.file.path;
           const noteId = this.existingNoteMap.get(k)?.frontmatter?.id;
           if (noteId && path === file.path) {
-            return handleNoteChange({ id: noteId, deleted: true });
+            return handleNoteChange({ uuid: noteId, deleted: true });
           }
         }
       });
@@ -210,7 +210,7 @@ class FileSystemSync {
   static parseObsidianNote = (note: ObsidianNote): Note => {
     var { file, frontmatter, content } = note;
     return {
-      id: frontmatter.id,
+      uuid: frontmatter.id,
       title: frontmatter.title || undefined,
       content: content || undefined,
       source: frontmatter.source || undefined,

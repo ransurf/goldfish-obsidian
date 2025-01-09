@@ -123,7 +123,7 @@ export const getDefaultNoteTitle = (
     escapeTitle(noteCopy.source_title);
   if (!noteCopy.title) {
     if (!settings.auto_generate_title || titleFromContent.length === 0) {
-      noteCopy.title = noteCopy.id;
+      noteCopy.title = noteCopy.uuid;
     } else {
       noteCopy.title = titleFromContent;
     }
@@ -189,7 +189,7 @@ export function getFilledTemplate(
     template = template.replace(metadataMatch[0], newMetadata);
   }
   var newTemplate = template
-    .replace(/\$\{id\}/gm, note.id)
+    .replace(/\$\{id\}/gm, note.uuid)
     .replace(/\$\{title\}/gm, note.title)
     .replace(/\$\{datetime\}/gm, note.created_at)
     .replace(/\$\{tags\}/gm, `[${tags.join(", ")}]`)

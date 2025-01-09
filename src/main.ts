@@ -18,7 +18,7 @@ export interface ObsidianNote {
 }
 
 export interface Note {
-  id: string;
+  uuid: string;
   title?: string;
   content?: string;
   created_at?: string;
@@ -42,7 +42,7 @@ export default class FleetingNotesPlugin extends Plugin {
     await this.loadSettings();
     // This forces fleeting notes to sync with obsidian
     this.addCommand({
-      id: "sync-fleeting-notes",
+      uuid: "sync-fleeting-notes",
       name: "Sync Notes with Fleeting Notes",
       callback: async () => {
         const isSuccess = await this.syncFleetingNotes();
@@ -53,7 +53,7 @@ export default class FleetingNotesPlugin extends Plugin {
     });
 
     this.addCommand({
-      id: "create-empty-fleeting-note",
+      uuid: "create-empty-fleeting-note",
       name: "Create Empty Fleeting Note",
       callback: async () => {
         try {
@@ -66,7 +66,7 @@ export default class FleetingNotesPlugin extends Plugin {
     });
 
     this.addCommand({
-      id: "insert-notes-containing",
+      uuid: "insert-notes-containing",
       name: "Insert All Notes Containing Specific Text",
       callback: async () => {
         openInputModal(
@@ -329,7 +329,7 @@ export default class FleetingNotesPlugin extends Plugin {
       var notesToDelete = await Promise.all(
         notes.map(async (note) => {
           return {
-            id: note.id,
+            uuid: note.uuid,
             deleted: true,
           };
         }),
@@ -345,7 +345,7 @@ export default class FleetingNotesPlugin extends Plugin {
   async createEmptyFleetingNote() {
     const note = await this.supabaseSync.createEmptyNote();
     await this.fileSystemSync.upsertNotes([note]);
-    const obsNote = this.fileSystemSync.existingNoteMap.get(note.id);
+    const obsNote = this.fileSystemSync.existingNoteMap.get(note.uuid);
     this.app.workspace.activeLeaf.openFile(obsNote.file);
   }
 

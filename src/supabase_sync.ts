@@ -10,16 +10,12 @@ const supabase = createClient(
 );
 
 export interface SupabaseNote {
-  id: string;
-  title: string;
-  content: string;
-  source: string;
-  source_title?: string;
-  source_description?: string;
-  source_image_url?: string;
+  uuid: string | null;
+  title: string | null;
+  content: string | null;
   created_at: string;
-  modified_at: string;
-  deleted: boolean;
+  modified_at: string | null;
+  deleted_at: string | null;
   shared: boolean;
   encrypted: boolean;
   _partition: string;
@@ -41,10 +37,6 @@ class SupabaseSync {
       updateNote.title === tempSupaNote.title) &&
       (typeof updateNote.content !== "string" ||
         updateNote.content === tempSupaNote.content) &&
-      (typeof updateNote.source !== "string" ||
-        updateNote.source === tempSupaNote.source) &&
-      (typeof updateNote.deleted !== "boolean" ||
-        updateNote.deleted === tempSupaNote.deleted);
   }
 
   updateNote = async (note: Note) => {
@@ -54,7 +46,7 @@ class SupabaseSync {
   updateNotes = async (notes: Note[]) => {
     try {
       let supabaseNotes: SupabaseNote[] = [];
-      let noteIds = new Set(notes.map((note) => note.id));
+      let noteIds = new Set(notes.map((note) => note.uuid));
       // get all fields of the note
       const query = supabase
         .from("notes")
@@ -64,7 +56,7 @@ class SupabaseSync {
 
       // header size will be too big otherwise
       if (noteIds.size < 100) {
-        query.in("id", [...noteIds]);
+        query.in("uuid", [...noteIds]);
       }
       const res = await query;
 
@@ -78,7 +70,7 @@ class SupabaseSync {
       notes = notes.filter((note) => {
         let supabaseNote = res.data.find(
           (supabaseNote: SupabaseNote) =>
-            supabaseNote.id === note.id && noteIds.has(supabaseNote.id),
+            supabaseNote.uuid === note.uuid && noteIds.has(supabaseNote.uuid),
         );
         return (supabaseNote)
           ? !this.isUpdateNoteSimilar(supabaseNote, note)
@@ -88,7 +80,7 @@ class SupabaseSync {
       // merge possibly updated fields
       notes = notes.map((note) => {
         let supabaseNote = supabaseNotes?.find(
-          (supabaseNote: any) => supabaseNote.id === note.id,
+          (supabaseNote: any) => supabaseNote.uuid === note.uuid,
         );
         var newNote = {
           ...supabaseNote,
@@ -107,7 +99,7 @@ class SupabaseSync {
         const { error } = await supabase
           .from("notes")
           .upsert(notes, {
-            onConflict: "id",
+            onConflict: "uuid",
           });
         if (error) {
           throwError(error, error.message);
@@ -123,7 +115,7 @@ class SupabaseSync {
 
   createEmptyNote = async () => {
     const emptyNote = {
-      id: uuidv4(),
+      uuid: uuidv4(),
       title: "",
       content: "",
       source: "",

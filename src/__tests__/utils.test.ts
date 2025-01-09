@@ -65,7 +65,7 @@ describe('getDefaultNoteTitle', () => {
 
   it('should use note title if it exists', () => {
     const note: Note = {
-      id: '123',
+      uuid: '123',
       title: 'My \\Note /Title',
       content: 'Some content',
     };
@@ -78,7 +78,7 @@ describe('getDefaultNoteTitle', () => {
 
   it('should use title from content if note title is empty and auto_generate_title is enabled', () => {
     const note: Note = {
-      id: '123',
+      uuid: '123',
       content: 'Some content with slashes / and \\',
     };
 
@@ -89,7 +89,7 @@ describe('getDefaultNoteTitle', () => {
 
   it('should use note ID if note title is empty and auto_generate_title is disabled', () => {
     const note: Note = {
-      id: '123',
+      uuid: '123',
       content: 'Some content with slashes / and \\',
     };
 
@@ -111,7 +111,7 @@ describe('Crypto functions', () => {
   it('should throw an error with the wrong decryption key', () => {
     const originalText = 'My secret message';
     const correctKey = 'CorrectKey';
-    const wrongKey = 'WrongKey'; 
+    const wrongKey = 'WrongKey';
     const encryptedText = encryptText(originalText, correctKey);
 
     try {

@@ -36,7 +36,7 @@ export const DEFAULT_SETTINGS: FleetingNotesSettings = {
   attachments_folder: "",
   note_template: `---
 # Mandatory fields
-id: "\${id}"
+uuid: "\${id}"
 # Optional fields
 title: "\${title}"
 tags: \${tags}
@@ -141,7 +141,7 @@ export class FleetingNotesSettingsTab extends PluginSettingTab {
             new Notice(`Login failed - ${supaRes.error.message}`);
             return false;
           }
-  
+
           this.plugin.saveSettings();
           return true;
         } catch (err) {
@@ -162,7 +162,7 @@ export class FleetingNotesSettingsTab extends PluginSettingTab {
 
     const accountSetting = new Setting(containerEl)
       .setName("Account")
-      .setDesc(this.plugin.settings.supabaseId ? `You're currently signed in ${this.plugin.settings.email}` :"Manage your Fleeting Notes Account")
+      .setDesc(this.plugin.settings.supabaseId ? `You're currently signed in ${this.plugin.settings.email}` : "Manage your Fleeting Notes Account")
       .addButton((btn: any) =>
         btn
           .setButtonText(
