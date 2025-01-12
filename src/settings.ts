@@ -56,7 +56,7 @@ modified_date: "\${last_modified_date}"
   password: undefined,
   supabaseId: undefined,
   sync_interval: undefined,
-  date_format: "YYYY-MM-DD",
+  date_format: "YYYY-MM-DDTHH:mm:ssZ",
   title_template: "${title}",
 };
 export class GoldfishNotesSettingsTab extends PluginSettingTab {
