@@ -138,7 +138,7 @@ class SupabaseSync {
   getAllNotes = async () => {
     let notes: Note[] = [];
     try {
-      if (!this.settings.firebaseId && !this.settings.supabaseId) {
+      if (!this.settings.supabaseId) {
         throwError(
           "Fleeting Notes Sync Failed - Please Log In",
           "Fleeting Notes Sync Failed - Please Log In",
@@ -240,7 +240,7 @@ class SupabaseSync {
     return supabase.auth.onAuthStateChange(callback);
   };
   onNoteChange = async (handleNoteChange: (note: SupabaseNote) => void) => {
-    if (!this.settings.supabaseId && !this.settings.firebaseId) return;
+    if (!this.settings.supabaseId) return;
     await this.removeAllChannels();
     supabase
       .channel("public:notes")
@@ -257,9 +257,8 @@ class SupabaseSync {
           return;
         }
         if (
-          [this.settings.supabaseId, this.settings.firebaseId].includes(
-            note.user_id,
-          )
+          this.settings.supabaseId ===
+          note.user_id
         ) {
           handleNoteChange(note);
         }

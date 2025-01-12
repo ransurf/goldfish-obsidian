@@ -20,7 +20,6 @@ export interface FleetingNotesSettings {
   last_sync_time: Date;
   sync_obsidian_links: boolean;
   sync_obsidian_links_title: string;
-  firebaseId: string | undefined;
   supabaseId: string | undefined;
   email: string | undefined;
   password: string | undefined;
@@ -55,7 +54,6 @@ modified_date: "\${last_modified_date}"
   notes_filter: "",
   email: undefined,
   password: undefined,
-  firebaseId: undefined,
   supabaseId: undefined,
   encryption_key: "",
   sync_interval: undefined,
@@ -129,8 +127,6 @@ export class FleetingNotesSettingsTab extends PluginSettingTab {
           );
           const supaSuccess = supaRes === null || supaRes.error ? false : true;
           if (supaSuccess) {
-            this.plugin.settings.firebaseId =
-              supaRes.data.user.user_metadata.firebaseUid;
             this.plugin.settings.supabaseId = supaRes.data.user.id;
             this.plugin.settings.email = email;
             this.plugin.settings.password = password;
@@ -340,7 +336,7 @@ export class FleetingNotesSettingsTab extends PluginSettingTab {
     containerEl.createEl("h2", { text: "Other Settings" });
     new Setting(containerEl)
       .setName("Auto-generate note title")
-      .setDesc("Will generate based on note content")
+      .setDesc("When title is missing, will generate based on note content")
       .addToggle((tog) =>
         tog
           .setValue(this.plugin.settings.auto_generate_title)

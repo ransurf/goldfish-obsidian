@@ -151,14 +151,13 @@ export default class FleetingNotesPlugin extends Plugin {
   }
 
   isUserSignedIn() {
-    return this.settings.firebaseId || this.settings.supabaseId;
+    return this.settings.supabaseId;
   }
 
   signOutUser() {
     this.settings.supabaseId = undefined;
     this.settings.email = undefined;
     this.settings.password = undefined;
-    this.settings.firebaseId = undefined;
     this.saveSettings();
   }
 
