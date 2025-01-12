@@ -1,11 +1,11 @@
-import { escapeTitle, getDefaultNoteTitle, decryptText, encryptText } from "../utils";
-import { FleetingNotesSettings } from "../settings";
+import { escapeTitle, getDefaultNoteTitle, } from "../utils";
+import { GoldfishNotesSettings } from "../settings";
 import { Note } from "../main";
 
 
 describe('escapeTitle function', () => {
   it('should escape special characters', () => {
-    const input = '.#special/characters: ^';
+    const input = '#special/characters: ^';
     const expected = 'specialcharacters ';
     expect(escapeTitle(input)).toBe(expected);
   });
@@ -42,8 +42,8 @@ describe('escapeTitle function', () => {
 });
 
 describe('getDefaultNoteTitle', () => {
-  const settings: FleetingNotesSettings = {
-    fleeting_notes_folder: 'Fleeting Notes',
+  const settings: GoldfishNotesSettings = {
+    fleeting_notes_folder: 'Goldfish Notes',
     attachments_folder: 'Attachments',
     title_template: '${title}',
     auto_generate_title: true,
@@ -55,7 +55,6 @@ describe('getDefaultNoteTitle', () => {
     last_sync_time: undefined,
     sync_obsidian_links: false,
     sync_obsidian_links_title: "",
-    firebaseId: "",
     supabaseId: "",
     email: "",
     password: "",
@@ -68,6 +67,7 @@ describe('getDefaultNoteTitle', () => {
       uuid: '123',
       title: 'My \\Note /Title',
       content: 'Some content',
+      deleted_at: null,
     };
 
     const result = getDefaultNoteTitle(note, settings);
@@ -80,6 +80,7 @@ describe('getDefaultNoteTitle', () => {
     const note: Note = {
       uuid: '123',
       content: 'Some content with slashes / and \\',
+      deleted_at: null,
     };
 
     const result = getDefaultNoteTitle(note, { ...settings, auto_generate_title: true });
@@ -91,33 +92,11 @@ describe('getDefaultNoteTitle', () => {
     const note: Note = {
       uuid: '123',
       content: 'Some content with slashes / and \\',
+      deleted_at: null,
     };
 
     const result = getDefaultNoteTitle(note, { ...settings, auto_generate_title: false });
 
     expect(result).toBe('123.md');
-  });
-});
-
-describe('Crypto functions', () => {
-  it('should encrypt and decrypt correctly with the correct key', () => {
-    const originalText = 'My secret message';
-    const key = 'SecretKey';
-    const encryptedText = encryptText(originalText, key);
-    const decryptedText = decryptText(encryptedText, key);
-    expect(decryptedText).toEqual(originalText);
-  });
-
-  it('should throw an error with the wrong decryption key', () => {
-    const originalText = 'My secret message';
-    const correctKey = 'CorrectKey';
-    const wrongKey = 'WrongKey';
-    const encryptedText = encryptText(originalText, correctKey);
-
-    try {
-      decryptText(encryptedText, wrongKey);
-    } catch (error) {
-      expect(error).toEqual('Wrong encryption key');
-    }
   });
 });

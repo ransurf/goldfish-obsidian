@@ -3,7 +3,7 @@ var CryptoJS = require("crypto-js");
 import { moment } from "obsidian";
 import { InputModal, ModalInputField, Values } from "./components/inputModal";
 import { GoldfishNotesSettings } from "./settings";
-import { toISOStringWithTimezone } from "utils/date";
+import { toISOStringWithTimezone } from "./utils/date";
 
 export function openInputModal(
   title: string,
