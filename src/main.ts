@@ -5,8 +5,8 @@ import { MarkdownView, Notice, Plugin, TFile } from "obsidian";
 import SupabaseSync from "supabase_sync";
 import {
   DEFAULT_SETTINGS,
-  FleetingNotesSettings,
-  FleetingNotesSettingsTab,
+  GoldfishNotesSettings,
+  GoldfishNotesSettingsTab,
 } from "./settings";
 
 import { openInputModal, throwError } from "./utils";
@@ -29,8 +29,8 @@ export interface Note {
   deleted_at: string;
 }
 
-export default class FleetingNotesPlugin extends Plugin {
-  settings: FleetingNotesSettings;
+export default class GoldfishNotesPlugin extends Plugin {
+  settings: GoldfishNotesSettings;
   supabaseAuthSubscription: Subscription | undefined;
   fileSystemSync: FileSystemSync;
   supabaseSync: SupabaseSync;
@@ -40,10 +40,10 @@ export default class FleetingNotesPlugin extends Plugin {
     await this.loadSettings();
     // This forces goldfish notes to sync with obsidian
     this.addCommand({
-      id: "sync-fleeting-notes",
+      id: "sync-goldfish-notes",
       name: "Sync Notes with Goldfish Notes",
       callback: async () => {
-        const isSuccess = await this.syncFleetingNotes();
+        const isSuccess = await this.syncGoldfishNotes();
         if (isSuccess) {
           new Notice("Goldfish Notes Sync Success");
         }
@@ -85,7 +85,7 @@ export default class FleetingNotesPlugin extends Plugin {
     });
 
     // This adds a settings tab so the user can configure various aspects of the plugin
-    this.addSettingTab(new FleetingNotesSettingsTab(this.app, this));
+    this.addSettingTab(new GoldfishNotesSettingsTab(this.app, this));
 
     // listen for auth state changes
     const { data } = await SupabaseSync.onAuthStateChange(
@@ -129,7 +129,7 @@ export default class FleetingNotesPlugin extends Plugin {
     }
   }
 
-  async reloginOnSignout(event: string, settings: FleetingNotesSettings) {
+  async reloginOnSignout(event: string, settings: GoldfishNotesSettings) {
     if (event == "SIGNED_OUT") {
       const sessionRestored = await SupabaseSync.restoreSession();
       if (sessionRestored) {
@@ -164,9 +164,9 @@ export default class FleetingNotesPlugin extends Plugin {
   autoSync(syncIntervalMin: number = 30) {
     const syncIntervalMs = syncIntervalMin * 60 * 1000;
     this.disableAutoSync();
-    this.syncFleetingNotes();
+    this.syncGoldfishNotes();
     this.settings.sync_interval = setInterval(
-      this.syncFleetingNotes.bind(this),
+      this.syncGoldfishNotes.bind(this),
       syncIntervalMs,
     );
   }
@@ -217,7 +217,7 @@ export default class FleetingNotesPlugin extends Plugin {
   }
 
   // syncs changes between obsidian and goldfish notes
-  async syncFleetingNotes() {
+  async syncGoldfishNotes() {
     if (!this.isUserSignedIn()) {
       new Notice("No login credentials found");
       return false;
@@ -238,7 +238,7 @@ export default class FleetingNotesPlugin extends Plugin {
       const deleteAfterSync = this.settings.sync_type == "one-way-delete";
       await this.fileSystemSync.upsertNotes(notes, deleteAfterSync);
       if (deleteAfterSync) {
-        await this.deleteFleetingNotes(notes);
+        await this.deleteGoldfishNotes(notes);
       }
       this.settings.last_sync_time = new Date();
 
@@ -261,7 +261,7 @@ export default class FleetingNotesPlugin extends Plugin {
     doc.replaceSelection(content);
   }
 
-  async pushFleetingNotes() {
+  async pushGoldfishNotes() {
     try {
       var modifiedNotes = await this.getUpdatedLocalNotes();
       var formattedNotes = await Promise.all(
@@ -279,7 +279,7 @@ export default class FleetingNotesPlugin extends Plugin {
     }
   }
 
-  async deleteFleetingNotes(notes: Note[]) {
+  async deleteGoldfishNotes(notes: Note[]) {
     try {
       var notesToDelete = await Promise.all(
         notes.map(async (note) => {

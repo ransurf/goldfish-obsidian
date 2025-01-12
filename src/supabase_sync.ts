@@ -1,7 +1,7 @@
 import { AuthResponse, createClient } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
 import { Note } from "main";
-import { FleetingNotesSettings } from "settings";
+import { GoldfishNotesSettings } from "settings";
 import { throwError } from "utils";
 import { toISOStringWithTimezone } from "utils/date";
 
@@ -22,8 +22,8 @@ export interface SupabaseNote {
 }
 
 class SupabaseSync {
-  settings: FleetingNotesSettings;
-  constructor(settings: FleetingNotesSettings) {
+  settings: GoldfishNotesSettings;
+  constructor(settings: GoldfishNotesSettings) {
     this.settings = settings;
   }
 

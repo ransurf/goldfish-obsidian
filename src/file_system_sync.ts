@@ -7,7 +7,7 @@ import {
   TFile,
   Vault,
 } from "obsidian";
-import { FleetingNotesSettings } from "settings";
+import { GoldfishNotesSettings } from "settings";
 import {
   convertObsidianPath,
   getDefaultNoteTitle,
@@ -19,7 +19,7 @@ import {
 
 class FileSystemSync {
   vault: Vault;
-  settings: FleetingNotesSettings;
+  settings: GoldfishNotesSettings;
   existingNoteMap: Map<String, ObsidianNote> = new Map<
     string,
     ObsidianNote
@@ -27,7 +27,7 @@ class FileSystemSync {
   modifyRef: EventRef;
   deleteRef: EventRef;
 
-  constructor(vault: Vault, settings: FleetingNotesSettings) {
+  constructor(vault: Vault, settings: GoldfishNotesSettings) {
     this.vault = vault;
     this.settings = settings;
   }

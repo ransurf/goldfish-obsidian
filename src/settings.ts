@@ -5,11 +5,11 @@ import {
   Setting,
   TextAreaComponent,
 } from "obsidian";
-import FleetingNotesPlugin from "./main";
+import GoldfishNotesPlugin from "./main";
 import { openInputModal } from "utils";
 import SupabaseSync from "supabase_sync";
 import grayMatter from "gray-matter";
-export interface FleetingNotesSettings {
+export interface GoldfishNotesSettings {
   auto_generate_title: boolean;
   fleeting_notes_folder: string;
   attachments_folder: string;
@@ -29,7 +29,7 @@ export interface FleetingNotesSettings {
   title_template: string;
 }
 
-export const DEFAULT_SETTINGS: FleetingNotesSettings = {
+export const DEFAULT_SETTINGS: GoldfishNotesSettings = {
   auto_generate_title: true,
   fleeting_notes_folder: "GoldfishNotes",
   attachments_folder: "Attachments",
@@ -60,10 +60,10 @@ modified_date: "\${last_modified_date}"
   date_format: "YYYY-MM-DD",
   title_template: "${title}",
 };
-export class FleetingNotesSettingsTab extends PluginSettingTab {
-  plugin: FleetingNotesPlugin;
+export class GoldfishNotesSettingsTab extends PluginSettingTab {
+  plugin: GoldfishNotesPlugin;
 
-  constructor(app: App, plugin: FleetingNotesPlugin) {
+  constructor(app: App, plugin: GoldfishNotesPlugin) {
     super(app, plugin);
     this.plugin = plugin;
   }

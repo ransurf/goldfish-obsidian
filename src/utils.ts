@@ -2,8 +2,7 @@ import { Note } from "./main";
 var CryptoJS = require("crypto-js");
 import { moment } from "obsidian";
 import { InputModal, ModalInputField, Values } from "./components/inputModal";
-import { SupabaseNote } from "./supabase_sync";
-import { FleetingNotesSettings } from "./settings";
+import { GoldfishNotesSettings } from "./settings";
 import { toISOStringWithTimezone } from "utils/date";
 
 export function openInputModal(
@@ -52,7 +51,7 @@ export const escapeTitle = (t: string | null) =>
 
 export const getDefaultNoteTitle = (
   note: Note,
-  settings: FleetingNotesSettings,
+  settings: GoldfishNotesSettings,
 ) => {
   const noteCopy = { ...note } as Note;
   const titleFromContent = escapeTitle(noteCopy.content)

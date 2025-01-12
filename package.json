@@ -1,16 +1,16 @@
 {
-	"name": "fleeting-notes-obsidian",
-	"version": "0.6.3",
+	"name": "goldfish-notes-sync",
+	"version": "0.1.0",
 	"description": "This is a plugin to sync Goldfish Notes with Obsidian",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"version": "0.6.3",
+		"version": "0.1.0",
 		"test": "jest --config ./jest.config.js"
 	},
 	"keywords": [],
-	"author": "Matthew Wong",
+	"author": "John Mavrick",
 	"license": "MIT",
 	"devDependencies": {
 		"@types/crypto-js": "^4.1.1",
