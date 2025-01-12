@@ -234,9 +234,8 @@ export default class GoldfishNotesPlugin extends Plugin {
           note.original_transcript = convertHtmlToMarkdown(note.original_transcript);
         }
       });
-      notes = notes.filter((note: Note) => !note.deleted_at);
       const deleteAfterSync = this.settings.sync_type == "one-way-delete";
-      await this.fileSystemSync.upsertNotes(notes, deleteAfterSync);
+      await this.fileSystemSync.upsertNotesToMarkdownFiles(notes, deleteAfterSync);
       if (deleteAfterSync) {
         await this.deleteGoldfishNotes(notes);
       }
@@ -292,7 +291,7 @@ export default class GoldfishNotesPlugin extends Plugin {
 
   async createEmptyFleetingNote() {
     const note = await this.supabaseSync.createEmptyNote();
-    await this.fileSystemSync.upsertNotes([note]);
+    await this.fileSystemSync.upsertNotesToMarkdownFiles([note]);
     const obsNote = this.fileSystemSync.existingNoteMap.get(note.uuid);
     this.app.workspace.activeLeaf.openFile(obsNote.file);
   }

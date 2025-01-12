@@ -40,7 +40,7 @@ class FileSystemSync {
 
   dirPath = () => convertObsidianPath(this.settings.fleeting_notes_folder);
 
-  upsertNotes = async (notes: Array<Note>, addDeleted = false) => {
+  upsertNotesToMarkdownFiles = async (notes: Array<Note>, addDeleted = false) => {
     try {
       // create folder on init (if doesnt exists)
       await this.vault.adapter.exists(this.settings.fleeting_notes_folder).then(
@@ -201,6 +201,9 @@ class FileSystemSync {
     let count = 0;
     while (this.vault.getAbstractFileByPath(path) != null) {
       count += 1;
+      const invalidChars = /[<>:"\/\\|?*\[\]]/g;
+      const sanitizedNoteFileName = noteFileName.replace(invalidChars, '');
+      path = convertObsidianPath(pathJoin([this.dirPath(), sanitizedNoteFileName]));
       path = path.replace(/( \([\d]+\))?\.([^/.]+)$/, ` (${count}).$2`);
     }
     return path;
