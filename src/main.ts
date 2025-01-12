@@ -50,18 +50,18 @@ export default class FleetingNotesPlugin extends Plugin {
       },
     });
 
-    this.addCommand({
-      id: "create-empty-fleeting-note",
-      name: "Create Empty Fleeting Note",
-      callback: async () => {
-        try {
-          await this.createEmptyFleetingNote();
-        } catch (e) {
-          console.error(e);
-          new Notice("Failed to create a Fleeting Note :(");
-        }
-      },
-    });
+    // this.addCommand({
+    //   id: "create-empty-fleeting-note",
+    //   name: "Create Empty Fleeting Note",
+    //   callback: async () => {
+    //     try {
+    //       await this.createEmptyFleetingNote();
+    //     } catch (e) {
+    //       console.error(e);
+    //       new Notice("Failed to create a Fleeting Note :(");
+    //     }
+    //   },
+    // });
 
     this.addCommand({
       id: "insert-notes-containing",
@@ -248,7 +248,7 @@ export default class FleetingNotesPlugin extends Plugin {
         new Notice(e);
       } else {
         console.error(e);
-        new Notice("Fleeing Notes sync failed - please check settings");
+        new Notice("Goldfish Notes sync failed - please check settings");
       }
     }
     return false;
