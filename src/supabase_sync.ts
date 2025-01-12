@@ -49,7 +49,6 @@ class SupabaseSync {
         .from("notes")
         .select()
         .eq("user_id", this.settings.supabaseId)
-        .eq("deleted_at", toISOStringWithTimezone());
 
       // header size will be too big otherwise
       if (noteIds.size < 100) {
@@ -105,6 +104,22 @@ class SupabaseSync {
         e,
         "Failed to update notes in Goldfish Notes",
       );
+    }
+  };
+  deleteNotes = async (uuids: string[]) => {
+    try {
+      const deleted_at = toISOStringWithTimezone();
+      const { error } = await supabase
+        .from("notes")
+        .update({ deleted_at })
+        .in("uuid", uuids)
+        .eq("user_id", this.settings.supabaseId);
+
+      if (error) {
+        throwError(error, error.message);
+      }
+    } catch (e) {
+      throwError(e, "Failed to delete notes in Goldfish Notes");
     }
   };
 

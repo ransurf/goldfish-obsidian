@@ -281,16 +281,9 @@ export default class GoldfishNotesPlugin extends Plugin {
 
   async deleteGoldfishNotes(notes: Note[]) {
     try {
-      var notesToDelete = await Promise.all(
-        notes.map(async (note) => {
-          return {
-            uuid: note.uuid,
-            deleted_at: toISOStringWithTimezone(),
-          };
-        }),
-      );
+      const notesToDelete = notes.map((note) => note.uuid);
       if (notesToDelete.length > 0) {
-        await this.supabaseSync.updateNotes(notesToDelete);
+        await this.supabaseSync.deleteNotes(notesToDelete);
       }
     } catch (e) {
       throwError(e, "Failed to delete notes from Goldfish Notes");
