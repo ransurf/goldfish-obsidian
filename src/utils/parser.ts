@@ -64,13 +64,23 @@ export function convertHtmlToMarkdown(html: string): string {
     },
   });
 
+  turndownService.addRule("trimListItem", {
+    filter: "li",
+    replacement: (content, node) => {
+      const listItemContent = content.trim();
+      const prefix = node.parentNode?.nodeName === "OL" ? "1. " : "- ";
+      const indentation = getNodeIndentation(node);
+      return `${indentation}${prefix}${listItemContent}\n`;
+    },
+  });
+
   return turndownService.turndown(html);
 }
 
 // Helper function to determine indentation based on nesting level
 function getNodeIndentation(node: Node): string {
   const level = getNodeLevel(node);
-  return '  '.repeat(level);
+  return '    '.repeat(level - 1);
 }
 
 // Function to get the level of nesting
