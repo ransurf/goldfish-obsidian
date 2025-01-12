@@ -261,7 +261,7 @@ export class FleetingNotesSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Title Template")
       .setDesc(
-        "By default the ${title} variable populates the title in order of: Note title > Source title > Note ID",
+        "By default the ${title} variable populates the title in order of: Note title > Note content (if auto-generate option is enabled) > Note ID",
       )
       .addText((text) =>
         text
