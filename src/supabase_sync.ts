@@ -103,7 +103,7 @@ class SupabaseSync {
     } catch (e) {
       throwError(
         e,
-        "Failed to update notes in Fleeting Notes",
+        "Failed to update notes in Goldfish Notes",
       );
     }
   };
@@ -140,8 +140,8 @@ class SupabaseSync {
     try {
       if (!this.settings.supabaseId) {
         throwError(
-          "Fleeting Notes Sync Failed - Please Log In",
-          "Fleeting Notes Sync Failed - Please Log In",
+          "Goldfish Notes Sync Failed - Please Log In",
+          "Goldfish Notes Sync Failed - Please Log In",
         );
       }
       let query = supabase
@@ -173,7 +173,7 @@ class SupabaseSync {
     } catch (e) {
       throwError(
         e,
-        "Failed to get notes from Fleeting Notes - Check your credentials",
+        "Failed to get notes from Goldfish Notes - Check your credentials",
       );
     }
     return notes;

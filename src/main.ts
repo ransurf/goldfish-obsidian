@@ -38,14 +38,14 @@ export default class FleetingNotesPlugin extends Plugin {
 
   async onload() {
     await this.loadSettings();
-    // This forces fleeting notes to sync with obsidian
+    // This forces goldfish notes to sync with obsidian
     this.addCommand({
       id: "sync-fleeting-notes",
-      name: "Sync Notes with Fleeting Notes",
+      name: "Sync Notes with Goldfish Notes",
       callback: async () => {
         const isSuccess = await this.syncFleetingNotes();
         if (isSuccess) {
-          new Notice("Fleeting Notes Sync Success");
+          new Notice("Goldfish Notes Sync Success");
         }
       },
     });
@@ -216,14 +216,14 @@ export default class FleetingNotesPlugin extends Plugin {
     }
   }
 
-  // syncs changes between obsidian and fleeting notes
+  // syncs changes between obsidian and goldfish notes
   async syncFleetingNotes() {
     if (!this.isUserSignedIn()) {
       new Notice("No login credentials found");
       return false;
     }
     try {
-      // pull fleeting notes
+      // pull goldfish notes
       let notes = await this.supabaseSync.getAllNotes();
       notes.forEach((note: Note) => {
         if (note.content) {
@@ -274,7 +274,7 @@ export default class FleetingNotesPlugin extends Plugin {
     } catch (e) {
       throwError(
         e,
-        "Failed to push notes from Obsidian to Fleeting Notes",
+        "Failed to push notes from Obsidian to Goldfish Notes",
       );
     }
   }
@@ -293,7 +293,7 @@ export default class FleetingNotesPlugin extends Plugin {
         await this.supabaseSync.updateNotes(notesToDelete);
       }
     } catch (e) {
-      throwError(e, "Failed to delete notes from Fleeting Notes");
+      throwError(e, "Failed to delete notes from Goldfish Notes");
     }
   }
 

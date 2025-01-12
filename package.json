@@ -1,7 +1,7 @@
 {
 	"name": "fleeting-notes-obsidian",
 	"version": "0.6.3",
-	"description": "This is a plugin to sync Fleeting Notes with Obsidian",
+	"description": "This is a plugin to sync Goldfish Notes with Obsidian",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

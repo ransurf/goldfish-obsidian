@@ -88,12 +88,12 @@ export class FleetingNotesSettingsTab extends PluginSettingTab {
   async manageAccount(accountSetting: any, btn: any) {
     if (this.plugin.isUserSignedIn()) {
       this.plugin.signOutUser();
-      accountSetting.setDesc("Manage your Fleeting Notes Account");
+      accountSetting.setDesc("Manage your Goldfish Notes Account");
       btn.setButtonText("Sign In").setCta();
       return;
     }
     openInputModal(
-      "Login to Fleeting Notes",
+      "Login to Goldfish Notes",
       [
         {
           label: "Email",
@@ -157,7 +157,7 @@ export class FleetingNotesSettingsTab extends PluginSettingTab {
 
     const accountSetting = new Setting(containerEl)
       .setName("Account")
-      .setDesc(this.plugin.settings.supabaseId ? `You're currently signed in ${this.plugin.settings.email}` : "Manage your Fleeting Notes Account")
+      .setDesc(this.plugin.settings.supabaseId ? `You're currently signed in ${this.plugin.settings.email}` : "Manage your Goldfish Notes Account")
       .addButton((btn: any) =>
         btn
           .setButtonText(

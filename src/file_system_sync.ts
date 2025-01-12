@@ -173,7 +173,7 @@ class FileSystemSync {
         }),
       );
     } catch (e) {
-      throwError(e, "Failed to delete notes from Fleeting Notes");
+      throwError(e, "Failed to delete notes from Goldfish Notes");
     }
   };
 
