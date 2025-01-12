@@ -34,7 +34,7 @@ class FileSystemSync {
 
   init = async () => {
     await this.getAllNotes().then((notes) => {
-      notes.forEach((n) => this.existingNoteMap.set(n.frontmatter.id, n));
+      notes.forEach((n) => this.existingNoteMap.set(n.frontmatter.uuid, n));
     });
   };
 
@@ -148,7 +148,7 @@ class FileSystemSync {
         if (!this.fileInDir(file)) continue;
         var file_id: string;
         var { frontmatter, content } = await this.parseNoteFile(file);
-        file_id = frontmatter.id || null;
+        file_id = frontmatter.uuid || null;
         if (file_id !== null) {
           noteList.push({ file, frontmatter, content });
         }
@@ -157,7 +157,7 @@ class FileSystemSync {
       throwError(e, `Failed to get existing notes from obsidian`);
     }
     this.existingNoteMap.clear();
-    noteList.forEach((n) => this.existingNoteMap.set(n.frontmatter.id, n));
+    noteList.forEach((n) => this.existingNoteMap.set(n.frontmatter.uuid, n));
     return noteList;
   };
   deleteNotes = async (notes: Note[]) => {
@@ -181,7 +181,7 @@ class FileSystemSync {
   static parseObsidianNote = (note: ObsidianNote): Note => {
     var { file, frontmatter, content } = note;
     return {
-      uuid: frontmatter.id,
+      uuid: frontmatter.uuid,
       title: frontmatter.title || undefined,
       content: content || undefined,
       deleted_at: frontmatter.deleted_at || undefined,

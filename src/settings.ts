@@ -23,7 +23,6 @@ export interface GoldfishNotesSettings {
   supabaseId: string | undefined;
   email: string | undefined;
   password: string | undefined;
-  encryption_key: string;
   sync_interval: NodeJS.Timer | undefined;
   date_format: string;
   title_template: string;
@@ -34,9 +33,10 @@ export const DEFAULT_SETTINGS: GoldfishNotesSettings = {
   fleeting_notes_folder: "GoldfishNotes",
   attachments_folder: "Attachments",
   note_template: `---
+# Required fields
+uuid: "\${uuid}"
 # Optional fields
 title: "\${title}"
-tags: \${tags}
 created_date: "\${created_date}"
 modified_date: "\${last_modified_date}"
 ---
@@ -55,7 +55,6 @@ modified_date: "\${last_modified_date}"
   email: undefined,
   password: undefined,
   supabaseId: undefined,
-  encryption_key: "",
   sync_interval: undefined,
   date_format: "YYYY-MM-DD",
   title_template: "${title}",
@@ -76,8 +75,8 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
     }
     try {
       parsedNote = grayMatter(val);
-      if (!parsedNote?.data?.id) {
-        error = "Note template 'id' field is required";
+      if (!parsedNote?.data?.uuid) {
+        error = "Note template 'uuid' field is required";
       }
     } catch (_e) {
       error = "Note template incorrect format";
@@ -166,19 +165,6 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
           .setCta()
           .onClick(async () => await this.manageAccount(accountSetting, btn))
       );
-
-    new Setting(containerEl)
-      .setName("Encryption key")
-      .setDesc("Encryption key used to encrypt notes")
-      .addText((text) => {
-        text.setPlaceholder("Enter encryption key")
-          .setValue(this.plugin.settings.encryption_key)
-          .onChange(async (value) => {
-            this.plugin.settings.encryption_key = value;
-            await this.plugin.saveSettings();
-          });
-        text.inputEl.type = "password";
-      });
 
     containerEl.createEl("h2", { text: "Sync Settings" });
 

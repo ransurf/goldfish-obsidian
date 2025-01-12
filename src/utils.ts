@@ -89,9 +89,9 @@ export function getFilledTemplate(
   const metadataMatch = template.match(/^---\n([\s\S]*?)\n---\n/m);
   let content = note.content;
   let tags: string[] = [];
-  if (template.includes("${tags}")) {
-    tags = extractAllTags(note.content);
-  }
+  // if (template.includes("${tags}")) {
+  //   tags = extractAllTags(note.content);
+  // }
   if (metadataMatch) {
     const escapedTitle = escapeForYaml(note.title);
     const escapedContent = escapeForYaml(content);
@@ -99,7 +99,7 @@ export function getFilledTemplate(
     const escapedTags = `[${tags.join(", ")}]`;
     var newMetadata = metadataMatch[1]
       .replace(/\$\{title\}/gm, escapedTitle)
-      .replace(/\$\{tags\}/gm, escapedTags)
+      // .replace(/\$\{tags\}/gm, escapedTags)
       .replace(/\$\{cleaned\}/gm, escapedContent)
       .replace(/\$\{original\}/gm, escapedOriginalTranscript)
     if (addDeleted) {
@@ -115,10 +115,10 @@ export function getFilledTemplate(
     template = template.replace(metadataMatch[0], newMetadata);
   }
   var newTemplate = template
-    .replace(/\$\{id\}/gm, note.uuid)
+    .replace(/\$\{uuid\}/gm, note.uuid)
     .replace(/\$\{title\}/gm, note.title)
-    .replace(/\$\{datetime\}/gm, note.created_at)
-    .replace(/\$\{tags\}/gm, `[${tags.join(", ")}]`)
+    // .replace(/\$\{datetime\}/gm, note.created_at)
+    // .replace(/\$\{tags\}/gm, `[${tags.join(", ")}]`)
     .replace(
       /\$\{created_date\}/gm,
       moment(note.created_at).local().format(dateFormat),
