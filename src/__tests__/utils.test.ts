@@ -43,6 +43,7 @@ describe('escapeTitle function', () => {
 
 describe('getDefaultNoteTitle', () => {
   const settings: GoldfishNotesSettings = {
+    download_audio_files: false,
     fleeting_notes_folder: 'Goldfish Notes',
     attachments_folder: 'Attachments',
     title_template: '${title}',
@@ -58,7 +59,6 @@ describe('getDefaultNoteTitle', () => {
     supabaseId: "",
     email: "",
     password: "",
-    encryption_key: "",
     sync_interval: undefined
   };
 
