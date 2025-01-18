@@ -16,6 +16,8 @@ import {
   throwError,
   escapeTitle,
 } from "utils";
+import SupabaseSync from "./supabase_sync";
+import { Notice } from "obsidian";
 
 class FileSystemSync {
   vault: Vault;
@@ -112,32 +114,32 @@ class FileSystemSync {
     }
   };
 
-  // downloadSource = async (note: Note, folder: string): Promise<void> => {
-  //   try {
-  //     const re = /^https:\/\/\w+\.supabase\.co\/storage\/.+$/;
-  //     if (!(re.test(note.source) && this.settings.attachments_folder)) return;
-  //     const ext = note.source.split(".").pop();
-  //     let filename = `${note.uuid}.${ext}`;
-  //     const title = escapeTitle(note.title)
-  //     if (title) {
-  //       filename = (title.endsWith(`.${ext}`))
-  //         ? title
-  //         : `${title}.${ext}`;
-  //     }
-  //     const path = pathJoin([folder, filename]);
-  //     if (await this.vault.adapter.exists(path)) {
-  //       console.log(`File "${path}" already exists`);
-  //       return;
-  //     }
-  //     const res = await requestUrl({
-  //       method: "GET",
-  //       url: note.source,
-  //     });
-  //     this.vault.createBinary(path, res.arrayBuffer);
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // };
+  downloadSource = async (note: Note, folder: string): Promise<void> => {
+    const audio_url = note.audio_url;
+    try {
+      if (!audio_url || !this.settings.attachments_folder) return;
+      const filename = audio_url.split("/").pop();
+      const path = pathJoin([folder, filename]);
+      if (await this.vault.adapter.exists(path)) {
+        console.log(`File "${path}" already exists`);
+        return;
+      }
+      const fullAudioPath = `${this.settings.supabaseId}/${audio_url}`;
+      const data = await SupabaseSync.fetchAudioFile(fullAudioPath);
+      await this.vault.createBinary(path, await data.arrayBuffer());
+    } catch (e) {
+
+      const noteCreatedAt = new Date(note?.created_at);
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      if (noteCreatedAt < sevenDaysAgo) {
+        new Notice(`Failed to download audio file for note ${audio_url} since we delete audio files older than 7 days.`);
+      } else {
+        new Notice(`Failed to download audio file for note ${audio_url}.`);
+      }
+      console.error(e);
+    }
+  };
 
   getAllNotes = async () => {
     const noteList: Array<ObsidianNote> = [];

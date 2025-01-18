@@ -17,6 +17,7 @@ export interface GoldfishNotesSettings {
   sync_type: string;
   notes_filter: string;
   sync_on_startup: boolean;
+  download_audio_files: boolean;
   last_sync_time: Date;
   sync_obsidian_links: boolean;
   sync_obsidian_links_title: string;
@@ -37,16 +38,22 @@ export const DEFAULT_SETTINGS: GoldfishNotesSettings = {
 uuid: "\${uuid}"
 # Optional fields
 title: "\${title}"
-created_date: "\${created_date}"
-modified_date: "\${last_modified_date}"
+created: "\${created_date}"
+modified: "\${last_modified_date}"
 ---
+
 ## Cleaned
+
 \${cleaned}
 
 ## Original
+
+\${audio_file_embed}
+
 \${original}`
   ,
   sync_on_startup: false,
+  download_audio_files: false,
   last_sync_time: new Date(0),
   sync_type: "one-way-delete",
   sync_obsidian_links: false,
@@ -190,6 +197,17 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
           .setValue(this.plugin.settings.attachments_folder)
           .onChange(async (value: string) => {
             this.plugin.settings.attachments_folder = value;
+            await this.plugin.saveSettings();
+          })
+      );
+    new Setting(containerEl)
+      .setName("Download audio files")
+      .setDesc("Audio files will be downloaded in the attachments folder specified above, and can be added to the note template with ${audio_file_embed}. We only store the audio file for 7 days, so files older than that will not have working links.")
+      .addToggle((tog) =>
+        tog
+          .setValue(this.plugin.settings.download_audio_files)
+          .onChange(async (val) => {
+            this.plugin.settings.download_audio_files = val;
             await this.plugin.saveSettings();
           })
       );

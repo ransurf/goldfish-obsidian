@@ -24,6 +24,7 @@ export interface Note {
   title?: string;
   content?: string;
   original_transcript?: string;
+  audio_url?: string;
   created_at?: string;
   modified_at?: string;
   deleted_at: string;
@@ -227,13 +228,21 @@ export default class GoldfishNotesPlugin extends Plugin {
       let notes = await this.supabaseSync.getAllNotes();
       notes.forEach((note: Note) => {
         if (note.content) {
-          console.log('note content prior conversion', note.content)
           note.content = convertHtmlToMarkdown(note.content);
         }
         if (note.original_transcript) {
           note.original_transcript = convertHtmlToMarkdown(note.original_transcript);
         }
       });
+
+      if (this.settings.download_audio_files) {
+        notes.forEach((note: Note) => {
+          if (note.audio_url) {
+            this.fileSystemSync.downloadSource(note, this.settings.attachments_folder);
+          }
+        });
+      }
+
       const deleteAfterSync = this.settings.sync_type == "one-way-delete";
       await this.fileSystemSync.upsertNotesToMarkdownFiles(notes, deleteAfterSync);
       if (deleteAfterSync) {

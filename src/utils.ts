@@ -97,7 +97,7 @@ export function getFilledTemplate(
     const escapedContent = escapeForYaml(content);
     const escapedOriginalTranscript = escapeForYaml(note.original_transcript);
     const escapedTags = `[${tags.join(", ")}]`;
-    var newMetadata = metadataMatch[1]
+    let newMetadata = metadataMatch[1]
       .replace(/\$\{title\}/gm, escapedTitle)
       // .replace(/\$\{tags\}/gm, escapedTags)
       .replace(/\$\{cleaned\}/gm, escapedContent)
@@ -114,7 +114,7 @@ export function getFilledTemplate(
     newMetadata = `---\n${newMetadata}\n---\n`;
     template = template.replace(metadataMatch[0], newMetadata);
   }
-  var newTemplate = template
+  let newTemplate = template
     .replace(/\$\{uuid\}/gm, note.uuid)
     .replace(/\$\{title\}/gm, note.title)
     // .replace(/\$\{datetime\}/gm, note.created_at)
@@ -129,6 +129,8 @@ export function getFilledTemplate(
     )
     .replace(/\$\{cleaned\}/gm, content)
     .replace(/\$\{original\}/gm, note.original_transcript)
+    //TODO: only replace if audio file exists
+    .replace(/\$\{audio_file_embed\}/gm, note?.audio_url ? `![[${note.audio_url}]]` : "")
 
   return newTemplate;
 }

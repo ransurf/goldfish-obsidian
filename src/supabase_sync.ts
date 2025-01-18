@@ -284,6 +284,18 @@ class SupabaseSync {
   removeAllChannels = async () => {
     await supabase.removeAllChannels();
   };
+
+  static fetchAudioFile = async (completeAudioURL: string) => {
+    console.log('completeAudioURL', completeAudioURL)
+    const { data, error } = await supabase
+      .storage
+      .from('voice-notes')
+      .download(completeAudioURL);
+    if (error) {
+      throwError(error, error.message);
+    }
+    return data;
+  };
 }
 
 export default SupabaseSync;
