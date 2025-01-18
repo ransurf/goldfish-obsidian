@@ -189,6 +189,18 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
+      .setName("Download audio files")
+      .setDesc("Audio files will be downloaded in the attachments folder specified below, and can be added to the note template with ${audio_file_embed}. We only store the audio file for 7 days, so notes older than that will not have working links.")
+      .addToggle((tog) =>
+        tog
+          .setValue(this.plugin.settings.download_audio_files)
+          .onChange(async (val) => {
+            this.plugin.settings.download_audio_files = val;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
       .setName("Attachments folder location")
       .setDesc("Attachments will be populated here")
       .addText((text) =>
@@ -197,17 +209,6 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
           .setValue(this.plugin.settings.attachments_folder)
           .onChange(async (value: string) => {
             this.plugin.settings.attachments_folder = value;
-            await this.plugin.saveSettings();
-          })
-      );
-    new Setting(containerEl)
-      .setName("Download audio files")
-      .setDesc("Audio files will be downloaded in the attachments folder specified above, and can be added to the note template with ${audio_file_embed}. We only store the audio file for 7 days, so files older than that will not have working links.")
-      .addToggle((tog) =>
-        tog
-          .setValue(this.plugin.settings.download_audio_files)
-          .onChange(async (val) => {
-            this.plugin.settings.download_audio_files = val;
             await this.plugin.saveSettings();
           })
       );
@@ -231,12 +232,13 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Sync type")
+      .setDesc("One-way sync + delete will delete notes in Goldfish Notes that are successfully imported into Obsidian.")
       .addDropdown((dropdown) =>
         dropdown
           .addOption("one-way", "One-way sync (Goldfish ⇒ Obsidian)")
           .addOption(
             "one-way-delete",
-            "One-way sync (Goldfish ⇒ Obsidian) + Delete",
+            "One-way sync + Delete",
           )
           // .addOption(
           //   "realtime-one-way",

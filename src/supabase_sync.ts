@@ -169,10 +169,8 @@ class SupabaseSync {
         .filter("deleted_at", "is", null);
       await query.then((res) => {
         if (res.error) {
-          console.log('res.error', res.error)
           throwError(res.error, res.error.message);
         }
-        console.log('res.data', res.data)
         notes = Array.from(
           res.data || [],
         );
