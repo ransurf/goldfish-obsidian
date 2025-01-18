@@ -48,8 +48,6 @@ modified: "\${last_modified_date}"
 
 ## Original
 
-\${audio_file_embed}
-
 \${original}`
   ,
   sync_on_startup: false,
