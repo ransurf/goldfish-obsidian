@@ -68,20 +68,20 @@ export default class GoldfishNotesPlugin extends Plugin {
       id: "insert-notes-containing",
       name: "Insert All Notes Containing Specific Text",
       callback: async () => {
-        openInputModal(
-          "Insert All Notes Containing:",
-          [
+        openInputModal({
+          title: "Insert All Notes Containing:",
+          inputs: [
             {
               label: "Text",
               value: "text",
             },
           ],
-          "Search",
-          async (result) => {
+          submitText: "Search",
+          onSubmit: async (result) => {
             this.embedNotesWithText(result.text);
             return true;
           },
-        );
+        });
       },
     });
 
