@@ -5,13 +5,20 @@ import { InputModal, ModalInputField, Values } from "./components/inputModal";
 import { GoldfishNotesSettings } from "./settings";
 import { toISOStringWithTimezone } from "./utils/date";
 
-export function openInputModal(
-  title: string,
-  inputs: ModalInputField[],
-  submitText: string,
-  onSubmit: (results: Values) => Promise<boolean>,
-) {
-  new InputModal(this.app, { title, inputs, submitText, onSubmit }).open();
+export function openInputModal({
+  title,
+  description,
+  inputs,
+  submitText,
+  onSubmit,
+}: {
+  title: string;
+  description?: string;
+  inputs: ModalInputField[];
+  submitText: string;
+  onSubmit: (results: Values) => Promise<boolean>;
+}) {
+  new InputModal(this.app, { title, description, inputs, submitText, onSubmit }).open();
 }
 
 // helper functions

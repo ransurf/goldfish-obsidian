@@ -96,9 +96,10 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
       btn.setButtonText("Sign In").setCta();
       return;
     }
-    openInputModal(
-      "Login to Goldfish Notes",
-      [
+    openInputModal({
+      title: "Login to Goldfish Notes",
+      description: "Please use email and password.\nIf you don't have a password, please create one by signing up with the same email as your Google account using the mobile app or https://account.goldfishnotes.com",
+      inputs: [
         {
           label: "Email",
           value: "email",
@@ -109,8 +110,8 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
           type: "password",
         },
       ],
-      "Login",
-      async (data) => {
+      submitText: "Login",
+      onSubmit: async (data) => {
         const { email, password } = data;
 
         if (!email || !password) {
@@ -134,7 +135,7 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
             this.plugin.settings.supabaseId = supaRes.data.user.id;
             this.plugin.settings.email = email;
             this.plugin.settings.password = password;
-            accountSetting.setDesc(`You're currently signed in ${this.plugin.settings.email}`);
+            accountSetting.setDesc(`You're currently signed in as ${this.plugin.settings.email}`);
             btn.setButtonText("Sign Out").setCta();
           } else {
             new Notice(`Login failed - ${supaRes.error.message}`);
@@ -148,7 +149,7 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
           return false;
         }
       },
-    );
+    });
   }
 
   display(): void {
