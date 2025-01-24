@@ -44,7 +44,7 @@ describe('escapeTitle function', () => {
 describe('getDefaultNoteTitle', () => {
   const settings: GoldfishNotesSettings = {
     download_audio_files: false,
-    fleeting_notes_folder: 'Goldfish Notes',
+    synced_notes_folder: 'Goldfish Notes',
     attachments_folder: 'Attachments',
     title_template: '${title}',
     auto_generate_title: true,

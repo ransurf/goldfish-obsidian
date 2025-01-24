@@ -40,12 +40,12 @@ class FileSystemSync {
     });
   };
 
-  dirPath = () => convertObsidianPath(this.settings.fleeting_notes_folder);
+  dirPath = () => convertObsidianPath(this.settings.synced_notes_folder);
 
   upsertNotesToMarkdownFiles = async (notes: Array<Note>, addDeleted = false) => {
     try {
       // create folder on init (if doesnt exists)
-      await this.vault.adapter.exists(this.settings.fleeting_notes_folder).then(
+      await this.vault.adapter.exists(this.settings.synced_notes_folder).then(
         (exists) => {
           if (!exists) {
             this.vault.createFolder(this.dirPath());

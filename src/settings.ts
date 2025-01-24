@@ -9,9 +9,11 @@ import GoldfishNotesPlugin from "./main";
 import { openInputModal } from "utils";
 import SupabaseSync from "supabase_sync";
 import grayMatter from "gray-matter";
+import { FolderSuggest } from "./settings/FolderSuggester";
+
 export interface GoldfishNotesSettings {
   auto_generate_title: boolean;
-  fleeting_notes_folder: string;
+  synced_notes_folder: string;
   attachments_folder: string;
   note_template: string;
   sync_type: string;
@@ -31,7 +33,7 @@ export interface GoldfishNotesSettings {
 
 export const DEFAULT_SETTINGS: GoldfishNotesSettings = {
   auto_generate_title: true,
-  fleeting_notes_folder: "GoldfishNotes",
+  synced_notes_folder: "GoldfishNotes",
   attachments_folder: "Attachments",
   note_template: `---
 # Required fields
@@ -176,16 +178,16 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Notes folder location")
-      .setDesc("Notes will be populated here")
-      .addText((text) =>
-        text
-          .setPlaceholder("Enter the folder location")
-          .setValue(this.plugin.settings.fleeting_notes_folder)
-          .onChange(async (value) => {
-            this.plugin.settings.fleeting_notes_folder = value;
+      .setDesc("Synced notes will be added to this folder")
+      .addSearch((cb) => {
+        new FolderSuggest(this.app, cb.inputEl);
+        cb.setPlaceholder("Example: folder1/folder2")
+          .setValue(this.plugin.settings.synced_notes_folder)
+          .onChange(async (new_folder) => {
+            this.plugin.settings.synced_notes_folder = new_folder;
             await this.plugin.saveSettings();
-          })
-      );
+          });
+      });
 
     new Setting(containerEl)
       .setName("Download audio files")
@@ -202,15 +204,15 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Attachments folder location")
       .setDesc("Attachments will be populated here")
-      .addText((text) =>
-        text
-          .setPlaceholder("Enter the folder location")
+      .addSearch((cb) => {
+        new FolderSuggest(this.app, cb.inputEl);
+        cb.setPlaceholder("Example: folder1/folder2")
           .setValue(this.plugin.settings.attachments_folder)
-          .onChange(async (value: string) => {
-            this.plugin.settings.attachments_folder = value;
+          .onChange(async (new_folder) => {
+            this.plugin.settings.attachments_folder = new_folder;
             await this.plugin.saveSettings();
-          })
-      );
+          });
+      });
 
     new Setting(containerEl)
       .setName("Sync notes automatically")
