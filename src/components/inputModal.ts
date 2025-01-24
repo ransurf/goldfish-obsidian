@@ -1,4 +1,5 @@
 import { App, Modal, Setting } from "obsidian";
+import { createTextWithLinks } from "../text";
 
 export interface ModalInputField {
   label: string;
@@ -44,18 +45,8 @@ export class InputModal extends Modal {
     contentEl.createEl("h1", { text: this.title });
 
     if (this.description) {
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      const descriptionParts = this.description.split(urlRegex);
       const descriptionEl = contentEl.createEl("p");
-
-      descriptionParts.forEach(part => {
-        if (urlRegex.test(part)) {
-          const linkEl = descriptionEl.createEl("a", { text: part, href: part });
-          linkEl.setAttr("target", "_blank");
-        } else {
-          descriptionEl.appendText(part);
-        }
-      });
+      createTextWithLinks(this.description, descriptionEl);
     }
 
     for (const input of this.inputs) {

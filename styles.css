@@ -9,3 +9,8 @@
 .invalid-input {
     border-color: red;
 }
+
+.muted-text {
+    color: var(--text-muted);
+    font-size: 12px;
+}

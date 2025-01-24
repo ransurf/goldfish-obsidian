@@ -10,6 +10,7 @@ import { openInputModal, isValidTitle } from "utils";
 import SupabaseSync from "supabase_sync";
 import grayMatter from "gray-matter";
 import { FolderSuggest } from "./settings/FolderSuggester";
+import { createTextWithLinks } from "./text";
 
 export interface GoldfishNotesSettings {
   auto_generate_title: boolean;
@@ -363,18 +364,22 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
       });
     new Setting(containerEl)
       .setName("Date format")
-      .setDesc(
-        "Affected variables: created_date, last_modified_date. For more formatting options, see: https://momentjs.com/docs/#/displaying/",
-      )
-      .addText((text) =>
+      .setDesc("Change the way the date variables will be formatted.")
+      .addText((text) => {
+        const descEl = containerEl.createEl("div");
+        createTextWithLinks(
+          "For formatting options, see: https://momentjs.com/docs/#/displaying/",
+          descEl
+        );
+        descEl.className = "muted-text";
         text
           .setPlaceholder("Enter date format")
           .setValue(this.plugin.settings.date_format)
           .onChange(async (value) => {
             this.plugin.settings.date_format = value;
             await this.plugin.saveSettings();
-          })
-      );
+          });
+      });
 
     containerEl.createEl("h2", { text: "Other Settings" });
     new Setting(containerEl)
