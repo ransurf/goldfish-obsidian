@@ -1,3 +1,7 @@
 .note_template {
     width: calc(100%);
 }
+
+.folder_suggest_input {
+    width: calc(100% - 20px);
+}
