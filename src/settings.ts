@@ -187,17 +187,35 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
             this.plugin.settings.synced_notes_folder = new_folder;
             await this.plugin.saveSettings();
           });
+        // @ts-ignore
+        cb.containerEl.addClass("folder_suggest_input");
       });
 
     new Setting(containerEl)
       .setName("Download audio files")
-      .setDesc("Audio files will be downloaded in the attachments folder specified below, and can be added to the note template with ${audio_file_embed}. We only store the audio file for 7 days, so notes older than that will not have working links.")
+      .setDesc("Audio files will be downloaded in the attachments folder specified below. We only store the audio file for 7 days, so notes older than that will not have working links. To add it to the template, use the ${audio_file_embed} variable.")
       .addToggle((tog) =>
         tog
           .setValue(this.plugin.settings.download_audio_files)
           .onChange(async (val) => {
             this.plugin.settings.download_audio_files = val;
+            if (val) {
+              // Add ${audio_file_embed} to the start of the note_template
+              const template = this.plugin.settings.note_template;
+              const yamlMatch = template.match(/^---\n[\s\S]*?\n---\n?/);
+              if (yamlMatch) {
+                this.plugin.settings.note_template = `${yamlMatch[0]}${'\n\${audio_file_embed}\n'}${template.slice(yamlMatch[0].length)}`;
+              } else {
+                this.plugin.settings.note_template = `\${audio_file_embed}\n${template}`;
+              }
+              new Notice(`The embed has been added at the start of the note template. Feel free to customize it further.`);
+            } else {
+              // Remove ${audio_file_embed} from the note_template
+              this.plugin.settings.note_template = this.plugin.settings.note_template.replace(/\${audio_file_embed}?/, '');
+              new Notice(`The embed has been removed from the note template.`);
+            }
             await this.plugin.saveSettings();
+            this.display();
           })
       );
 
@@ -212,6 +230,8 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
             this.plugin.settings.attachments_folder = new_folder;
             await this.plugin.saveSettings();
           });
+        // @ts-ignore
+        cb.containerEl.addClass("folder_suggest_input");
       });
 
     new Setting(containerEl)
