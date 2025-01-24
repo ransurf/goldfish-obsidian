@@ -6,7 +6,7 @@ import {
   TextAreaComponent,
 } from "obsidian";
 import GoldfishNotesPlugin from "./main";
-import { openInputModal } from "utils";
+import { openInputModal, isValidTitle } from "utils";
 import SupabaseSync from "supabase_sync";
 import grayMatter from "gray-matter";
 import { FolderSuggest } from "./settings/FolderSuggester";
@@ -290,15 +290,31 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
       .setDesc(
         "By default the ${title} variable populates the title in order of: Note title > Note content (if auto-generate option is enabled) > Note ID",
       )
-      .addText((text) =>
+      .addText((text) => {
+        const errorTitleTemplate = containerEl.createEl("div", {
+          cls: "setting-item-description",
+          text: "",
+        });
+        errorTitleTemplate.style.display = "none";
+
         text
           .setPlaceholder("Enter title format")
           .setValue(this.plugin.settings.title_template)
           .onChange(async (value: string) => {
-            this.plugin.settings.title_template = value;
-            await this.plugin.saveSettings();
-          })
-      );
+            if (isValidTitle(value)) {
+              errorTitleTemplate.style.display = "none";
+              text.inputEl.removeClass("invalid-input");
+              this.plugin.settings.title_template = value;
+              await this.plugin.saveSettings();
+            } else {
+              errorTitleTemplate.style.display = "block";
+              errorTitleTemplate.style.color = "red";
+              errorTitleTemplate.style.paddingBottom = "12px";
+              errorTitleTemplate.innerText = "Invalid characters in title template";
+              text.inputEl.addClass("invalid-input");
+            }
+          });
+      });
 
     new Setting(containerEl)
       .setName("Note Template")

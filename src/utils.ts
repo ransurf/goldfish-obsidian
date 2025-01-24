@@ -141,3 +141,9 @@ export function getFilledTemplate(
 
   return newTemplate;
 }
+
+export const invalidTitleChars = /[\[\]:\/\\\^\|\#\?]/;
+
+export function isValidTitle(template: string): boolean {
+  return !invalidTitleChars.test(template);
+}

@@ -5,3 +5,7 @@
 .folder_suggest_input {
     width: calc(100% - 20px);
 }
+
+.invalid-input {
+    border-color: red;
+}

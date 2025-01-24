@@ -18,6 +18,7 @@ import {
 } from "utils";
 import SupabaseSync from "./supabase_sync";
 import { Notice } from "obsidian";
+import { invalidTitleChars } from "utils/regex";
 
 class FileSystemSync {
   vault: Vault;
@@ -203,8 +204,7 @@ class FileSystemSync {
     let count = 0;
     while (this.vault.getAbstractFileByPath(path) != null) {
       count += 1;
-      const invalidChars = /[<>:"\/\\|?*\[\]]/g;
-      const sanitizedNoteFileName = noteFileName.replace(invalidChars, '');
+      const sanitizedNoteFileName = noteFileName.replace(invalidTitleChars, '');
       path = convertObsidianPath(pathJoin([this.dirPath(), sanitizedNoteFileName]));
       path = path.replace(/( \([\d]+\))?\.([^/.]+)$/, ` (${count}).$2`);
     }
