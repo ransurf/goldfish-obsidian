@@ -204,14 +204,14 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
               const template = this.plugin.settings.note_template;
               const yamlMatch = template.match(/^---\n[\s\S]*?\n---\n?/);
               if (yamlMatch) {
-                this.plugin.settings.note_template = `${yamlMatch[0]}${'\n\${audio_file_embed}\n'}${template.slice(yamlMatch[0].length)}`;
+                this.plugin.settings.note_template = `${yamlMatch[0]}${'\${audio_file_embed}\n'}${template.slice(yamlMatch[0].length)}`;
               } else {
                 this.plugin.settings.note_template = `\${audio_file_embed}\n${template}`;
               }
               new Notice(`The embed has been added at the start of the note template. Feel free to customize it further.`);
             } else {
               // Remove ${audio_file_embed} from the note_template
-              this.plugin.settings.note_template = this.plugin.settings.note_template.replace(/\${audio_file_embed}?/, '');
+              this.plugin.settings.note_template = this.plugin.settings.note_template.replace(/\${audio_file_embed}\n?/, '');
               new Notice(`The embed has been removed from the note template.`);
             }
             await this.plugin.saveSettings();
