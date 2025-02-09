@@ -56,7 +56,7 @@ modified: "\${last_modified_date}"
   sync_on_startup: false,
   download_audio_files: false,
   last_sync_time: new Date(0),
-  sync_type: "one-way-delete",
+  sync_type: "one-way-overwrite",
   sync_obsidian_links: false,
   sync_obsidian_links_title: "Links from Obsidian",
   notes_filter: "",
@@ -179,7 +179,7 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Notes folder location")
-      .setDesc("Synced notes will be added to this folder")
+      .setDesc("Synced notes will be saved in the selected Obsidian folder.")
       .addSearch((cb) => {
         new FolderSuggest(this.app, cb.inputEl);
         cb.setPlaceholder("Example: folder1/folder2")
@@ -194,7 +194,7 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Download audio files")
-      .setDesc("Audio files will be downloaded in the attachments folder specified below. We only store the audio file for 7 days, so notes older than that will not have working links. To add it to the template, use the ${audio_file_embed} variable.")
+      .setDesc("Audio files are stored by Goldfish for 7 days. Newly synced Goldfish notes older than this will not have the audio file downloaded.")
       .addToggle((tog) =>
         tog
           .setValue(this.plugin.settings.download_audio_files)
@@ -222,7 +222,7 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Attachments folder location")
-      .setDesc("Attachments will be populated here")
+      .setDesc("Goldfish note audio files will be saved in the selected Obsidian folder.")
       .addSearch((cb) => {
         new FolderSuggest(this.app, cb.inputEl);
         cb.setPlaceholder("Example: folder1/folder2")
@@ -237,7 +237,7 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Sync notes automatically")
-      .setDesc("Sync will be performed on startup and every 30 minutes")
+      .setDesc("Automatically sync notes from Goldfish to Obsidian on Obsidian startup, then automatically every 30 minutes. When unchecked, notes only sync when manually running “Goldfish Notes Sync: Sync Notes with Goldfish Notes” command from Command Palette.")
       .addToggle((tog) =>
         tog
           .setValue(this.plugin.settings.sync_on_startup)
@@ -252,31 +252,37 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
           })
       );
 
+    const syncTypeDescription = document.createDocumentFragment();
+    syncTypeDescription.append(
+      'Notes sync is always one-way from Goldfish to Obsidian.',
+      containerEl.createEl('br'),
+      containerEl.createEl('br'),
+      containerEl.createEl('strong', { text: 'Sync and overwrite:' }),
+      ' New and updated notes in Goldfish will be synced to Obsidian. Synced notes edited in Obsidian will be overwritten by Goldfish versions on next sync unless moved out of synched notes folder.',
+      containerEl.createEl('br'),
+      containerEl.createEl('br'),
+      containerEl.createEl('strong', { text: 'Sync new only:' }),
+      ' Only new notes will be synced from Goldfish to Obsidian, but existing synced notes in Obsidian synced folder will not be modified.',
+      containerEl.createEl('br'),
+      containerEl.createEl('br'),
+      containerEl.createEl('strong', { text: 'Sync and delete:' }),
+      ' Notes synced from Goldfish to Obsidian will be deleted from Goldfish.'
+    );
+
     new Setting(containerEl)
       .setName("Sync type")
-      .setDesc("One-way sync + delete will delete notes in Goldfish Notes that are successfully imported into Obsidian.")
+      .setDesc(syncTypeDescription)
       .addDropdown((dropdown) =>
         dropdown
-          .addOption("one-way", "One-way sync (Goldfish ⇒ Obsidian)")
-          .addOption(
-            "one-way-delete",
-            "One-way sync + Delete",
-          )
-          // .addOption(
-          //   "realtime-one-way",
-          //   "Realtime One-way sync (FN ⇒ Obsidian)",
-          // )
-          // .addOption(
-          //   "realtime-two-way",
-          //   "Realtime Two-way sync (FN ⇔ Obsidian)",
-          // )
+          .addOption("one-way-overwrite", "Sync and overwrite")
+          .addOption("one-way-new-only", "Sync new only")
+          .addOption("one-way-delete", "Sync and delete")
           .setValue(this.plugin.settings.sync_type)
           .onChange(async (value) => {
             this.plugin.settings.sync_type = value;
             if (value.contains("two-way")) {
               noteTemplateComponent.inputEl.setAttr("disabled", true);
-              this.plugin.settings.note_template =
-                DEFAULT_SETTINGS.note_template;
+              this.plugin.settings.note_template = DEFAULT_SETTINGS.note_template;
               this.display();
             } else {
               noteTemplateComponent.inputEl.removeAttribute("disabled");
@@ -289,7 +295,7 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Title Template")
       .setDesc(
-        "By default the ${title} variable populates the title in order of: Note title > Note content (if auto-generate option is enabled) > Note ID",
+        "Customize how synced note titles are displayed in Obsidian. ${title} references the title synched from Goldfish. When a note doesn't have a title, it will resort to the note content (if auto-generate option is enabled), and lastly Note ID.",
       )
       .addText((text) => {
         const errorTitleTemplate = containerEl.createEl("div", {
@@ -319,7 +325,7 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Note Template")
-      .setDesc("Only editable in one-way sync");
+      .setDesc("Customize how synced note content is displayed in Obsidian.");
     new Setting(containerEl)
       .setHeading()
       .addTextArea((t) => {
@@ -384,7 +390,7 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
     containerEl.createEl("h2", { text: "Other Settings" });
     new Setting(containerEl)
       .setName("Auto-generate note title")
-      .setDesc("When title is missing, will generate based on note content")
+      .setDesc("Generate a title based on note content if Goldfish note title is missing.")
       .addToggle((tog) =>
         tog
           .setValue(this.plugin.settings.auto_generate_title)
@@ -397,7 +403,7 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Notes filter text")
       .setDesc(
-        "Notes will only be imported if the title/content includes the text",
+        "Notes from Goldfish will be synced to Obsidian if the title or content includes the specified text.",
       )
       .addText((text) =>
         text

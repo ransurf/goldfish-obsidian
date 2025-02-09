@@ -85,7 +85,7 @@ class FileSystemSync {
               // modify file if id exists in frontmatter
               await this.vault.modify(noteFile.file, mdContent);
             }
-          } else {
+          } else if (this.settings.sync_type === 'one-way-overwrite') {
             // recreate file otherwise
             var delFile = this.vault.getAbstractFileByPath(path);
             if (delFile != null) {
