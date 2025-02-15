@@ -20,6 +20,12 @@ import SupabaseSync from "./supabase_sync";
 import { Notice } from "obsidian";
 import { invalidTitleChars } from "utils/regex";
 
+// Add this type near the top of the file
+export interface NoteChangeStats {
+  created: number;
+  updated: number;
+}
+
 class FileSystemSync {
   vault: Vault;
   settings: GoldfishNotesSettings;
@@ -43,7 +49,11 @@ class FileSystemSync {
 
   dirPath = () => convertObsidianPath(this.settings.synced_notes_folder);
 
-  upsertNotesToMarkdownFiles = async (notes: Array<Note>, addDeleted = false) => {
+  upsertNotesToMarkdownFiles = async (notes: Array<Note>, addDeleted = false): Promise<NoteChangeStats> => {
+    const stats: NoteChangeStats = {
+      created: 0,
+      updated: 0
+    };
     try {
       // create folder on init (if doesnt exists)
       await this.vault.adapter.exists(this.settings.synced_notes_folder).then(
@@ -84,6 +94,7 @@ class FileSystemSync {
             if (oldMdContent != mdContent) {
               // modify file if id exists in frontmatter
               await this.vault.modify(noteFile.file, mdContent);
+              stats.updated++;
             }
             // update file if sync option is overwrite or delete
           } else if (this.settings.sync_type !== 'one-way-new-only') {
@@ -100,6 +111,7 @@ class FileSystemSync {
               frontmatter,
               content,
             });
+            stats.created++;
           }
           // // download source
           // this.downloadSource(note, this.settings.attachments_folder);
@@ -113,6 +125,7 @@ class FileSystemSync {
     } catch (e) {
       throwError(e, "Failed to write notes to Obsidian");
     }
+    return stats;
   };
 
   downloadSource = async (note: Note, folder: string): Promise<void> => {

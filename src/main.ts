@@ -1,6 +1,6 @@
 // import moment
 import { Subscription } from "@supabase/supabase-js";
-import FileSystemSync from "file_system_sync";
+import FileSystemSync, { NoteChangeStats } from "file_system_sync";
 import { MarkdownView, Notice, Plugin, TFile } from "obsidian";
 import SupabaseSync from "supabase_sync";
 import {
@@ -244,12 +244,13 @@ export default class GoldfishNotesPlugin extends Plugin {
       }
 
       const deleteAfterSync = this.settings.sync_type == "one-way-delete";
-      await this.fileSystemSync.upsertNotesToMarkdownFiles(notes, deleteAfterSync);
+      const stats = await this.fileSystemSync.upsertNotesToMarkdownFiles(notes, deleteAfterSync);
       if (deleteAfterSync) {
         await this.deleteGoldfishNotes(notes);
       }
       this.settings.last_sync_time = new Date();
 
+      new Notice(`Goldfish Notes Sync Success ✅\nCreated: ${stats.created}\nUpdated: ${stats.updated}`);
       return true;
     } catch (e) {
       if (typeof e === "string") {
