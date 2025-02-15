@@ -295,7 +295,7 @@ export class GoldfishNotesSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Title Template")
       .setDesc(
-        "Customize how synced note titles are displayed in Obsidian. ${title} references the title synched from Goldfish. When a note doesn't have a title, it will resort to the note content (if auto-generate option is enabled), and lastly Note ID.",
+        "Customize how synced note titles are displayed in Obsidian. ${title} references the title synched from Goldfish. If the title is missing, the note ID will be used instead.",
       )
       .addText((text) => {
         const errorTitleTemplate = containerEl.createEl("div", {
