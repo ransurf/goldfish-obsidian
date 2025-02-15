@@ -1,12 +1,12 @@
 {
 	"name": "goldfish-notes-sync",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"description": "This is a plugin to sync Goldfish Notes with Obsidian",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"version": "0.1.2",
+		"version": "0.1.3",
 		"test": "jest --config ./jest.config.js"
 	},
 	"keywords": [],
