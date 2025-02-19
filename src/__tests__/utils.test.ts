@@ -59,7 +59,8 @@ describe('getDefaultNoteTitle', () => {
     supabaseId: "",
     email: "",
     password: "",
-    sync_interval: undefined
+    sync_interval: undefined,
+    version: "",
   };
 
   it('should use note title if it exists', () => {
