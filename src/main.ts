@@ -1,7 +1,7 @@
 // import moment
 import { Subscription } from "@supabase/supabase-js";
-import FileSystemSync, { NoteChangeStats } from "file_system_sync";
-import { MarkdownView, Notice, Plugin, TFile } from "obsidian";
+import FileSystemSync from "file_system_sync";
+import { MarkdownView, Notice, Plugin, TFile, requestUrl } from "obsidian";
 import SupabaseSync from "supabase_sync";
 import {
   DEFAULT_SETTINGS,
@@ -36,6 +36,7 @@ export default class GoldfishNotesPlugin extends Plugin {
   fileSystemSync: FileSystemSync;
   supabaseSync: SupabaseSync;
   tokenRefreshTimer: NodeJS.Timer;
+  update_available: boolean;
 
   async onload() {
     await this.loadSettings();
@@ -50,6 +51,8 @@ export default class GoldfishNotesPlugin extends Plugin {
         }
       },
     });
+
+    await this.check_for_updates();
 
     // this.addCommand({
     //   id: "create-empty-fleeting-note",
@@ -114,6 +117,49 @@ export default class GoldfishNotesPlugin extends Plugin {
       }
     });
   }
+
+
+  // update logic from smart-connections
+  async check_for_updates() {
+    if (this.settings.version !== this.manifest.version) {
+      this.settings.version = this.manifest.version;
+      await this.saveSettings();
+    }
+    setTimeout(this.check_for_update.bind(this), 3000);
+    setInterval(this.check_for_update.bind(this), 10800000);
+  }
+
+  async check_for_update() {
+    try {
+      const { json: response } = await requestUrl({
+        url: "https://api.github.com/repos/ransurf/goldfish-obsidian/releases/latest",
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        contentType: "application/json",
+      });
+      const latest_release = response.tag_name;
+      if (latest_release !== this.manifest.version) {
+        const fragment = document.createDocumentFragment();
+        const notice = document.createElement("div");
+        notice.textContent = `A new version of obsidian-goldfish (v${latest_release}) is available 🎉\nPlease update the plugin by running the command "BRAT: Choose a single plugin verison to update" in the command palette.`;
+        const button = document.createElement("button");
+        button.textContent = "View release notes";
+        button.style.display = "block";
+        button.onclick = () => {
+          window.open("https://github.com/ransurf/goldfish-obsidian/releases", "_blank");
+        };
+        notice.appendChild(button);
+        fragment.appendChild(notice);
+        new Notice(fragment, 15000);
+        this.update_available = true;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
 
   disableAutoSync() {
     if (this.settings.sync_interval) {

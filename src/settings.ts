@@ -30,6 +30,7 @@ export interface GoldfishNotesSettings {
   sync_interval: NodeJS.Timer | undefined;
   date_format: string;
   title_template: string;
+  version: string;
 }
 
 export const DEFAULT_SETTINGS: GoldfishNotesSettings = {
@@ -66,6 +67,7 @@ modified: "\${last_modified_date}"
   sync_interval: undefined,
   date_format: "YYYY-MM-DDTHH:mm:ssZ",
   title_template: "${title}",
+  version: "0.1.4",
 };
 export class GoldfishNotesSettingsTab extends PluginSettingTab {
   plugin: GoldfishNotesPlugin;
