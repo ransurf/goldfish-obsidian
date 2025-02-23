@@ -134,6 +134,13 @@ class FileSystemSync {
       if (!audio_url || !this.settings.attachments_folder) return;
       const filename = audio_url.split("/").pop();
       const path = pathJoin([folder, filename]);
+      const noteCreatedAt = new Date(note?.created_at);
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      if (noteCreatedAt < sevenDaysAgo) {
+        new Notice(`Failed to download audio file for note ${audio_url} since we delete audio files older than 7 days.`);
+        return;
+      }
       if (await this.vault.adapter.exists(path)) {
         console.log(`File "${path}" already exists`);
         return;
@@ -142,15 +149,7 @@ class FileSystemSync {
       const data = await SupabaseSync.fetchAudioFile(fullAudioPath);
       await this.vault.createBinary(path, await data.arrayBuffer());
     } catch (e) {
-
-      const noteCreatedAt = new Date(note?.created_at);
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      if (noteCreatedAt < sevenDaysAgo) {
-        new Notice(`Failed to download audio file for note ${audio_url} since we delete audio files older than 7 days.`);
-      } else {
-        new Notice(`Failed to download audio file for note ${audio_url}.`);
-      }
+      new Notice(`Failed to download audio file for note ${audio_url}.`);
       console.error(e);
     }
   };
