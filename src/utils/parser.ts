@@ -74,7 +74,8 @@ export function convertHtmlToMarkdown(html: string): string {
     },
   });
 
-  return turndownService.turndown(html);
+  // Post-process to un-escape any asterisks that might have been escaped
+  return turndownService.turndown(html).replace(/\*/g, '*');
 }
 
 // Helper function to determine indentation based on nesting level
